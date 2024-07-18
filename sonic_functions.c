@@ -48,11 +48,18 @@ struct {
 	// this is used to store the time that is delayed between displaying the frames of the running sprite
 	Uint64 time_between_running_frames;
 
+	int running_start_x;
+	Uint32 running_start_x_time;
+
 } sonic;
 
 int sonic_start_running_right(){
 	sonic.action_start_time = SDL_GetPerformanceCounter();
 	sonic.current_action = RUNNINGRIGHT;
+
+	sonic.running_start_x = sonic.location.x;
+	sonic.running_start_x_time = SDL_GetTicks();
+
 	return 0;
 
 }
@@ -60,6 +67,10 @@ int sonic_start_running_right(){
 int sonic_start_running_left(){
 	sonic.action_start_time = SDL_GetPerformanceCounter();
 	sonic.current_action = RUNNINGLEFT;
+
+	sonic.running_start_x = sonic.location.x;
+	sonic.running_start_x_time = SDL_GetTicks();
+
 	return 0;
 
 }
@@ -116,39 +127,34 @@ int sonic_get_next_sprite(){
 
 int sonic_move(){
 	int elapsed_running_time;
-	Uint64 elapsed_time;
+	//Uint64 elapsed_time;
 	Uint64 end;
 	Uint64 x, y;
+	float tempx = 0;
+	Uint32 end_time;
+	Uint32 elapsed_time;
 
+	if(sonic.current_action == RUNNINGRIGHT){
 
-	switch(sonic.current_action){
-		case RUNNINGRIGHT:
-			// do this right beforehand to ensure that the timing is accurate
-			end = SDL_GetPerformanceCounter();
-			elapsed_time = end - sonic.action_start_time;
+		end_time = SDL_GetTicks();
+		elapsed_time = end_time - sonic.running_start_x_time;
 
-			if(elapsed_time > sonic.time_between_running_frames){
-				sonic.location.x += 1;
-				sonic.action_start_time = SDL_GetPerformanceCounter();
-			}
-			break;
+		tempx = (float)sonic.running_start_x + (float)(elapsed_time / 1.5);
+		sonic.location.x = (int)tempx;
 
-		case RUNNINGLEFT:
-			end = SDL_GetPerformanceCounter();
-			elapsed_time = end - sonic.action_start_time;
+	}
 
-			if(elapsed_time > sonic.time_between_running_frames){
-				sonic.location.x -= 1;
-				sonic.action_start_time = SDL_GetPerformanceCounter();
-			}
-			break;
+	if(sonic.current_action == RUNNINGLEFT){
 
-		case STANDING:
-			sonic.current_sprite_index = 0;
-			break;
+		end_time = SDL_GetTicks();
+		elapsed_time = end_time - sonic.running_start_x_time;
 
-		default:
-			break;
+		tempx = (float)sonic.running_start_x - (float)(elapsed_time / 1.5);
+		sonic.location.x = (int)tempx;
+	}
+
+	if(sonic.current_action == STANDING){
+		sonic.current_sprite_index = 0;
 	}
 
 	return 0;
