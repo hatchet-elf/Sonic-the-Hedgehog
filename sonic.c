@@ -1,6 +1,11 @@
 const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 960;
 
+
+int ground_level(){
+	return SCREEN_HEIGHT - 65 - 50;
+}
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,6 +14,7 @@ const int SCREEN_HEIGHT = 960;
 #include <math.h>
 #include <time.h>
 #include "sonic_functions.c"
+
 
 int main(int arc, char *argv[]){
 
@@ -52,7 +58,8 @@ int main(int arc, char *argv[]){
 	// Initiate everything for Sonic
 	sonic_init();
 	sonic.last_frame_timer = SDL_GetPerformanceCounter();
-	
+
+	printf("on the ground: %d\n", sonic.location.y);
 
 	while(gameisrunning){
 		while(SDL_PollEvent(&event)){

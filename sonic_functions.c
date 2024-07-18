@@ -9,8 +9,10 @@
 #define RUNNING_SPEED 600 
 #define TIME_BETWEEN_RUNNING_FRAMES 50
 
-#define JUMP_SPEED 1
-#define FALL_SPEED 500
+#define JUMP_HEIGHT 260
+#define JUMP_SPEED 1.2
+#define FALL_SPEED 1.2
+
 
 #define RUNNINGRIGHT 0
 #define RUNNINGLEFT 1
@@ -157,6 +159,8 @@ int sonic_get_next_sprite(){
 	return 0;
 }
 
+
+
 int sonic_move(){
 	int elapsed_running_time;
 	float tempx = 0;
@@ -197,14 +201,10 @@ int sonic_move(){
 		end_jump_time = SDL_GetTicks();
 		elapsed_jump_time = end_jump_time - sonic.jump_start_time;
 
-		y = (float)sonic.jump_y - (float)(elapsed_jump_time / JUMP_SPEED);
+		y = (float)sonic.jump_y - (float)(elapsed_jump_time * JUMP_SPEED);
 		sonic.location.y = (int)y;
-		//printf("sonic.location.y %d\n", sonic.location.y);
-		//printf("sonic.location.x %d\n", sonic.location.x);
 		
-		//printf("sonic.jump_y: %d\n", sonic.jump_y - 130);
-		
-		if(sonic.location.y <  (sonic.jump_y - 130)){
+		if(sonic.location.y <  (sonic.jump_y - JUMP_HEIGHT)){
 			
 			printf("Calling sonic_fall\n");
 			sonic_fall();
@@ -213,18 +213,15 @@ int sonic_move(){
 
 	if(sonic.current_action == FALLING){
 
-		if(sonic.location.y == (SCREEN_HEIGHT - sonic.sonicrect[0][0].h - 100)){
+		end_fall_time = SDL_GetTicks();
+		elapsed_fall_time = end_fall_time - sonic.fall_start_time;
+
+		y = (float)sonic.fall_y + (float)(elapsed_fall_time * FALL_SPEED);
+		sonic.location.y = (int)y;
+		
+		if(sonic.location.y > ground_level()){
+			printf("on the ground: %d\n", sonic.location.y);
 			       sonic.current_action = STANDING;
-		}else{
-
-			end_fall_time = SDL_GetTicks();
-			elapsed_fall_time = end_fall_time - sonic.fall_start_time;
-
-			y = (float)sonic.fall_y;// + (float)(elapsed_jump_time / FALL_SPEED);
-			printf("y %f\n", y);
-			sonic.location.y = (int)y;
-			//printf("sonic.location.y %d\n", sonic.location.y);
-			//printf("sonic.location.x %d\n", sonic.location.x);
 		}
 	}
 
@@ -276,7 +273,7 @@ int sonic_init(){
 
 	// have sonic start at the lower left of the screen
 	sonic.location.x = 100;
-	sonic.location.y = SCREEN_HEIGHT - sonic.sonicrect[0][0].h - 100;
+	sonic.location.y = ground_level();
 	sonic.location.w = 100; //sonicrect[0][0].w;
 	sonic.location.h = 100; //sonicrect[0][0].h;
 
