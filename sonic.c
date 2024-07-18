@@ -44,13 +44,15 @@ int main(int arc, char *argv[]){
 	// Initiate everything for SDl
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 	SDL_Event event;
-	sonic.time_between_running_frames = SDL_GetPerformanceFrequency() / RUNNING_SPEED;
 	charactersurface = IMG_Load("sonicsheet.png");
 	sonicsprite = SDL_CreateTextureFromSurface(renderer, charactersurface);
+
+	const Uint8 *keyboardstate;
 
 	// Initiate everything for Sonic
 	sonic_init();
 	sonic.last_frame_timer = SDL_GetPerformanceCounter();
+	
 
 	while(gameisrunning){
 		while(SDL_PollEvent(&event)){
@@ -58,32 +60,30 @@ int main(int arc, char *argv[]){
 				case SDL_QUIT:
 					gameisrunning = false;
 					break;
-
-				case SDL_KEYDOWN:
-					switch(event.key.keysym.sym){
-						case SDLK_RIGHT:
-							sonic_start_running_right();
-							break;
-
-						case SDLK_UP:
-							sonic_stand();
-							break;
-
-						case SDLK_LEFT:
-							sonic_start_running_left();
-							break;
-
-						case SDLK_q:
-							gameisrunning = false;
-							break;
-
-						default:
-							break;
-					}
-
-				default:
-					break;
 			}
+
+			keyboardstate = SDL_GetKeyboardState(NULL);
+			
+			if(keyboardstate[SDL_SCANCODE_UP]){
+				sonic_stand();
+			}
+
+			if(keyboardstate[SDL_SCANCODE_RIGHT]){
+				sonic_start_running_right();
+			}
+
+			if(keyboardstate[SDL_SCANCODE_LEFT]){
+				sonic_start_running_left();
+			}
+
+			if(keyboardstate[SDL_SCANCODE_Q]){
+				gameisrunning = false;
+			}
+
+			if(keyboardstate[SDL_SCANCODE_SPACE]){
+				sonic_jump();
+			}
+
 		}
 
 		sonic_get_next_sprite();
@@ -105,6 +105,13 @@ int main(int arc, char *argv[]){
 				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.running_right[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
 				break;
 
+			case JUMPING:
+				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[0], &sonic.location);
+				break;
+
+			case FALLING:
+				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[0], &sonic.location);
+				break;
 		}
 
 		SDL_RenderPresent(renderer);
