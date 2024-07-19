@@ -106,7 +106,7 @@ int main(int arc, char *argv[]){
 		// copy whichever is the correct sprite to the renderer
 		switch(sonic.current_x_action){
 			case RUNNINGRIGHT:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.running_right[sonic.current_sprite_index], &sonic.location);
+				SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_index], &sonic.location);
 				break;
 
 			case STANDING:
@@ -114,17 +114,13 @@ int main(int arc, char *argv[]){
 				break;
 
 			case RUNNINGLEFT:
-				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.running_right[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
+				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.running[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
 				break;
 
 		}
 
 		switch(sonic.current_y_action){
 			case JUMPING:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[0], &sonic.location);
-				break;
-
-			case FALLING:
 				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[0], &sonic.location);
 				break;
 		}

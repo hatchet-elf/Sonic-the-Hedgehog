@@ -8,20 +8,10 @@
 
 #define RUNNING_SPEED 1.5 
 #define TIME_BETWEEN_RUNNING_FRAMES 50
-#define TIME_BETWEEN_STANDING_FRAMES 80
+#define TIME_BETWEEN_STANDING_FRAMES 100
 
-#define JUMP_HEIGHT 260
-#define JUMP_SPEED 1.2
-
-#define FALL_SPEED 1.2
-
-#define MAX_X_SPEED 1
-
-// this is by how much the inertia will be increased when Sonic starts running
-#define RUNNING_INERTIA_INCREASE 1.9
-#define RUNNING_RIGHT_INERTIA_START 1.01 
-#define RUNNING_LEFT_INERTIA_START -1.01 
-
+#define GRAVITY .001
+#define JUMP_VELOCITY 2.2
 
 #define RUNNINGRIGHT 0
 #define RUNNINGLEFT 1
@@ -34,7 +24,6 @@
 #define FALLING 8
 #define ONTHEGROUND 9
 
-
 struct {
 	// this is all frames from the sprite sheet
 	SDL_Rect sonicrect[7][7];
@@ -43,7 +32,7 @@ struct {
 	SDL_Rect location;
 
 	// this is the an array of the frames for sonic running
-	SDL_Rect running_right[8];
+	SDL_Rect running[8];
 	SDL_Rect standing[5];
 
 	// used to show animation frames with correct timing
@@ -64,10 +53,7 @@ struct {
 	Uint32 jump_y;
 	Uint32 jump_start_time;
 
-	Uint32 fall_y;
-	Uint32 fall_start_time;
-
-
+	float jump_velocity;
 } sonic;
 
 int sonic_start_running_right(){
@@ -114,32 +100,22 @@ int sonic_jump(){
 	sonic.jump_start_time = SDL_GetTicks();
 	sonic.current_sprite_index = 0;
 
-	return 0;
-
-}
-
-int sonic_fall(){
-	sonic.current_y_action = FALLING;
-
-	// store where Sonic is when he starts 
-	sonic.fall_y = sonic.location.y;
-	sonic.fall_start_time = SDL_GetTicks();
-	sonic.current_sprite_index = 0;
+	sonic.jump_velocity = JUMP_VELOCITY;
 
 	return 0;
 
 }
-
-
 
 int sonic_stand(){
+	if(sonic.current_y_action == (JUMPING || FALLING)){
+		return 0;
+	}
+
 	sonic.current_x_action = STANDING;
-	sonic.current_y_action = ONTHEGROUND;
 	sonic.current_sprite_index = 0;
 
 	return 0;
 }
-
 
 int sonic_get_next_sprite(){
 	Uint32 elapsed_time;
@@ -147,7 +123,6 @@ int sonic_get_next_sprite(){
 
 	end = SDL_GetTicks();
 	elapsed_time = end - sonic.last_frame_timer;
-
 	
 	switch(sonic.current_x_action){
 		case RUNNINGRIGHT:
@@ -175,14 +150,15 @@ int sonic_get_next_sprite(){
 			break;
 
 		case STANDING:
-		if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES){
-			if(sonic.current_sprite_index == 4){
-				       sonic.current_sprite_index = 0;
-				} else {
-					sonic.current_sprite_index++;
-				}
-			sonic.last_frame_timer = SDL_GetTicks();
-		}
+			if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES){
+				if(sonic.current_sprite_index == 4){
+					       sonic.current_sprite_index = 0;
+					} else {
+						sonic.current_sprite_index++;
+					}
+
+				sonic.last_frame_timer = SDL_GetTicks();
+			}
 		break;
 
 	}
@@ -214,6 +190,8 @@ int sonic_move(){
 	Uint32 end_fall_time;
 	Uint32 elapsed_fall_time;
 
+	float dt;
+
 	// if statements are used rather than a switch statement
 	// the reason is that there may be more than one statement that gets used
 	// for example: jumping whilst running
@@ -222,7 +200,7 @@ int sonic_move(){
 		end_time = SDL_GetTicks();
 		elapsed_time = end_time - sonic.running_start_x_time;
 
-		tempx = (float)sonic.running_start_x + (float)(elapsed_time / 1.5);
+		tempx = (float)sonic.running_start_x + (float)(elapsed_time / RUNNING_SPEED);
 		sonic.location.x = (int)tempx;
 
 	}
@@ -232,7 +210,7 @@ int sonic_move(){
 		end_time = SDL_GetTicks();
 		elapsed_time = end_time - sonic.running_start_x_time;
 
-		tempx = (float)sonic.running_start_x - (float)(elapsed_time / 1.5);
+		tempx = (float)sonic.running_start_x - (float)(elapsed_time / RUNNING_SPEED);
 		sonic.location.x = (int)tempx;
 	}
 
@@ -241,28 +219,19 @@ int sonic_move(){
 		end_jump_time = SDL_GetTicks();
 		elapsed_jump_time = end_jump_time - sonic.jump_start_time;
 
-		y = (float)sonic.jump_y - (float)(elapsed_jump_time * JUMP_SPEED);
+		// this code is the jump
+		// very proud of this as I had to learn math that I didn't know existed
+		y = (float)sonic.jump_y - (float)(elapsed_jump_time * sonic.jump_velocity);
+		sonic.jump_velocity = sonic.jump_velocity - GRAVITY;
 		sonic.location.y = (int)y;
-		
-		if(sonic.location.y <  (sonic.jump_y - JUMP_HEIGHT)){
-			sonic_fall();
-		}
-	}
 
-	if(sonic.current_y_action == FALLING){
-
-		end_fall_time = SDL_GetTicks();
-		elapsed_fall_time = end_fall_time - sonic.fall_start_time;
-
-		y = (float)sonic.fall_y + (float)(elapsed_fall_time * FALL_SPEED);
-		sonic.location.y = (int)y;
-		
+		// when sonic gets to the ground then make him stand
 		if(sonic.location.y > ground_level()){
 			       sonic.current_y_action = STANDING;
 			       sonic.location.y = ground_level();
 		}
-	}
 
+	}
 
 	return 0;
 }
@@ -275,58 +244,70 @@ int sonic_init(){
 	sonic.current_y_action = ONTHEGROUND;
 
 	// setup all the frames for sonic running
-	sonic.running_right[0].y = 0;
-	sonic.running_right[0].x = 65 * 6;
+	sonic.running[0].y = 0;
+	sonic.running[0].x = 65 * 6;
+	sonic.running[0].h = 65;
+	sonic.running[0].w = 65;
 
-	sonic.running_right[1].y = 65;
-	sonic.running_right[1].x = 65 * 4;
+	sonic.running[1].y = 65;
+	sonic.running[1].x = 65 * 4;
+	sonic.running[1].h = 65;
+	sonic.running[1].w = 65;
 
-	sonic.running_right[2].y = 65;
-	sonic.running_right[2].x = 65 * 5;
+	sonic.running[2].y = 65;
+	sonic.running[2].x = 65 * 5;
+	sonic.running[2].h = 65;
+	sonic.running[2].w = 65;
 	
-	sonic.running_right[3].y = 65;
-	sonic.running_right[3].x = 65 * 6;
+	sonic.running[3].y = 65;
+	sonic.running[3].x = 65 * 6;
+	sonic.running[3].h = 65;
+	sonic.running[3].w = 65;
 
-	sonic.running_right[4].y = 65 * 2;
-	sonic.running_right[4].x = 65;
+	sonic.running[4].y = 65 * 2;
+	sonic.running[4].x = 65;
+	sonic.running[4].h = 65;
+	sonic.running[4].w = 65;
 
-	sonic.running_right[5].y = 65 * 2;
-	sonic.running_right[5].x = 0;
+	sonic.running[5].y = 65 * 2;
+	sonic.running[5].x = 0;
+	sonic.running[5].h = 65;
+	sonic.running[5].w = 65;
 
-	sonic.running_right[6].y = 65 * 2;
-	sonic.running_right[6].x = 65;
+	sonic.running[6].y = 65 * 2;
+	sonic.running[6].x = 65;
+	sonic.running[6].h = 65;
+	sonic.running[6].w = 65;
 
-	sonic.running_right[7].y = 65 * 2;
-	sonic.running_right[7].x = 65 * 2;
+	sonic.running[7].y = 65 * 2;
+	sonic.running[7].x = 65 * 2;
+	sonic.running[7].h = 65;
+	sonic.running[7].w = 65;
 
-	for(y = 0; y < 8; y++){
-		sonic.running_right[y].h = 65;
-		sonic.running_right[y].w = 65;
-	}
 
 	// setup the frames for sonic standing
-	sonic.standing[0].y = 0;
-	sonic.standing[0].x = 0;
-	sonic.standing[0].h = 65;
+	sonic.standing[0].y = -2;
+	sonic.standing[0].x = -1;
+	sonic.standing[0].h = 67;
 	sonic.standing[0].w = 65;
 
 	sonic.standing[1].y = 0;
-	sonic.standing[1].x = 65;
+	sonic.standing[1].x = 65 - 2;
 	sonic.standing[1].h = 65;
 	sonic.standing[1].w = 65;
 
 	sonic.standing[2].y = 0;
-	sonic.standing[2].x = 65 * 2;
+	sonic.standing[2].x = 65 * 2 - 3;
 	sonic.standing[2].h = 65;
 	sonic.standing[2].w = 65;
 
 	sonic.standing[3].y = 0;
-	sonic.standing[3].x = 65 * 3;
+	sonic.standing[3].x = 65 * 3 - 4;
 	sonic.standing[3].h = 65;
 	sonic.standing[3].w = 65;
 
 	sonic.standing[4].y = 0;
-	sonic.standing[4].x = 65 * 4;
+	sonic.standing[4].x = 65 * 4 - 5;
 	sonic.standing[4].h = 65;
 	sonic.standing[4].w = 65;
 
