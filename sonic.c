@@ -57,9 +57,8 @@ int main(int arc, char *argv[]){
 
 	// Initiate everything for Sonic
 	sonic_init();
-	sonic.last_frame_timer = SDL_GetPerformanceCounter();
 
-	printf("on the ground: %d\n", sonic.location.y);
+	sonic_stand();
 
 	while(gameisrunning){
 		while(SDL_PollEvent(&event)){
@@ -90,6 +89,12 @@ int main(int arc, char *argv[]){
 			if(keyboardstate[SDL_SCANCODE_SPACE]){
 				sonic_jump();
 			}
+			
+			if(!keyboardstate[SDL_SCANCODE_RIGHT] && !keyboardstate[SDL_SCANCODE_LEFT] && 
+					((sonic.current_x_action == RUNNINGLEFT) || (sonic.current_x_action == RUNNINGRIGHT))){
+				sonic_stand();
+			}
+
 
 		}
 
@@ -99,7 +104,7 @@ int main(int arc, char *argv[]){
 		SDL_RenderClear(renderer);
 
 		// copy whichever is the correct sprite to the renderer
-		switch(sonic.current_action){
+		switch(sonic.current_x_action){
 			case RUNNINGRIGHT:
 				SDL_RenderCopy(renderer, sonicsprite, &sonic.running_right[sonic.current_sprite_index], &sonic.location);
 				break;
@@ -112,6 +117,9 @@ int main(int arc, char *argv[]){
 				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.running_right[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
 				break;
 
+		}
+
+		switch(sonic.current_y_action){
 			case JUMPING:
 				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[0], &sonic.location);
 				break;

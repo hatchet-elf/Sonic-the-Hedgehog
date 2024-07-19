@@ -6,12 +6,21 @@
 #include <math.h>
 #include <time.h>
 
-#define RUNNING_SPEED 600 
+#define RUNNING_SPEED 1.5 
 #define TIME_BETWEEN_RUNNING_FRAMES 50
+#define TIME_BETWEEN_STANDING_FRAMES 80
 
 #define JUMP_HEIGHT 260
 #define JUMP_SPEED 1.2
+
 #define FALL_SPEED 1.2
+
+#define MAX_X_SPEED 1
+
+// this is by how much the inertia will be increased when Sonic starts running
+#define RUNNING_INERTIA_INCREASE 1.9
+#define RUNNING_RIGHT_INERTIA_START 1.01 
+#define RUNNING_LEFT_INERTIA_START -1.01 
 
 
 #define RUNNINGRIGHT 0
@@ -23,6 +32,7 @@
 #define TOPOFJUMP 6
 #define	STARTFALLING 7
 #define FALLING 8
+#define ONTHEGROUND 9
 
 
 struct {
@@ -34,14 +44,15 @@ struct {
 
 	// this is the an array of the frames for sonic running
 	SDL_Rect running_right[8];
-	SDL_Rect standing[4];
+	SDL_Rect standing[5];
 
 	// used to show animation frames with correct timing
 	Uint64 last_frame_timer;
 
 	// the current action is what Sonic is doing
 	// 	ie: running, standing or jumping
-	int current_action;
+	int current_x_action;
+	int current_y_action;
 
 	// the index of the current sprite in the current action
 	int current_sprite_index;
@@ -60,51 +71,71 @@ struct {
 } sonic;
 
 int sonic_start_running_right(){
-	sonic.current_action = RUNNINGRIGHT;
+	if(sonic.current_x_action = RUNNINGRIGHT){
+		return 0;
+	}
+
+	sonic.current_x_action = RUNNINGRIGHT;
 
 	// store where Sonic is when he starts running
 	sonic.running_start_x = sonic.location.x;
 	sonic.running_start_x_time = SDL_GetTicks();
-
-	return 0;
-
-}
-
-int sonic_jump(){
-	sonic.current_action = JUMPING;
-
-	// store where Sonic is when he starts 
-	sonic.jump_y = sonic.location.y;
-	sonic.jump_start_time = SDL_GetTicks();
-
-	return 0;
-
-}
-
-int sonic_fall(){
-	sonic.current_action = FALLING;
-
-	// store where Sonic is when he starts 
-	sonic.fall_y = sonic.location.y;
-	sonic.fall_start_time = SDL_GetTicks();
 
 	return 0;
 
 }
 
 int sonic_start_running_left(){
-	sonic.current_action = RUNNINGLEFT;
+	if(sonic.current_x_action == RUNNINGLEFT){
+		return 0;
+	}
+
+	sonic.current_x_action = RUNNINGLEFT;
 
 	// store where Sonic is when he starts running
 	sonic.running_start_x = sonic.location.x;
 	sonic.running_start_x_time = SDL_GetTicks();
 
+	sonic.current_sprite_index = 0;
+
+	return 0;
+}
+
+int sonic_jump(){
+	if(sonic.location.y != ground_level()){
+		return 0;
+	}
+
+
+	sonic.current_y_action = JUMPING;
+
+	// store where Sonic is when he starts 
+	sonic.jump_y = sonic.location.y;
+	sonic.jump_start_time = SDL_GetTicks();
+	sonic.current_sprite_index = 0;
+
 	return 0;
 
 }
 
+int sonic_fall(){
+	sonic.current_y_action = FALLING;
+
+	// store where Sonic is when he starts 
+	sonic.fall_y = sonic.location.y;
+	sonic.fall_start_time = SDL_GetTicks();
+	sonic.current_sprite_index = 0;
+
+	return 0;
+
+}
+
+
+
 int sonic_stand(){
-	sonic.current_action = STANDING;
+	sonic.current_x_action = STANDING;
+	sonic.current_y_action = ONTHEGROUND;
+	sonic.current_sprite_index = 0;
 
 	return 0;
 }
@@ -117,7 +148,8 @@ int sonic_get_next_sprite(){
 	end = SDL_GetTicks();
 	elapsed_time = end - sonic.last_frame_timer;
 
-	switch(sonic.current_action){
+	
+	switch(sonic.current_x_action){
 		case RUNNINGRIGHT:
 
 			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
@@ -142,18 +174,26 @@ int sonic_get_next_sprite(){
 			}
 			break;
 
-
 		case STANDING:
-			break;
+		if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES){
+			if(sonic.current_sprite_index == 4){
+				       sonic.current_sprite_index = 0;
+				} else {
+					sonic.current_sprite_index++;
+				}
+			sonic.last_frame_timer = SDL_GetTicks();
+		}
+		break;
 
+	}
+
+	switch(sonic.current_y_action){
 		case JUMPING:
 			break;
 
 		case FALLING:
 			break;
 
-		default:
-			break;
 	}
 
 	return 0;
@@ -177,7 +217,7 @@ int sonic_move(){
 	// if statements are used rather than a switch statement
 	// the reason is that there may be more than one statement that gets used
 	// for example: jumping whilst running
-	if(sonic.current_action == RUNNINGRIGHT){
+	if(sonic.current_x_action == RUNNINGRIGHT){
 
 		end_time = SDL_GetTicks();
 		elapsed_time = end_time - sonic.running_start_x_time;
@@ -187,7 +227,7 @@ int sonic_move(){
 
 	}
 
-	if(sonic.current_action == RUNNINGLEFT){
+	if(sonic.current_x_action == RUNNINGLEFT){
 
 		end_time = SDL_GetTicks();
 		elapsed_time = end_time - sonic.running_start_x_time;
@@ -196,7 +236,7 @@ int sonic_move(){
 		sonic.location.x = (int)tempx;
 	}
 
-	if(sonic.current_action == JUMPING){
+	if(sonic.current_y_action == JUMPING){
 
 		end_jump_time = SDL_GetTicks();
 		elapsed_jump_time = end_jump_time - sonic.jump_start_time;
@@ -205,13 +245,11 @@ int sonic_move(){
 		sonic.location.y = (int)y;
 		
 		if(sonic.location.y <  (sonic.jump_y - JUMP_HEIGHT)){
-			
-			printf("Calling sonic_fall\n");
 			sonic_fall();
 		}
 	}
 
-	if(sonic.current_action == FALLING){
+	if(sonic.current_y_action == FALLING){
 
 		end_fall_time = SDL_GetTicks();
 		elapsed_fall_time = end_fall_time - sonic.fall_start_time;
@@ -220,20 +258,21 @@ int sonic_move(){
 		sonic.location.y = (int)y;
 		
 		if(sonic.location.y > ground_level()){
-			printf("on the ground: %d\n", sonic.location.y);
-			       sonic.current_action = STANDING;
+			       sonic.current_y_action = STANDING;
+			       sonic.location.y = ground_level();
 		}
 	}
 
-	if(sonic.current_action == STANDING){
-		sonic.current_sprite_index = 0;
-	}
 
 	return 0;
 }
 
 int sonic_init(){
 	int x, y;
+
+	sonic.last_frame_timer = SDL_GetTicks();
+	sonic.current_x_action = STANDING;
+	sonic.current_y_action = ONTHEGROUND;
 
 	// setup all the frames for sonic running
 	sonic.running_right[0].y = 0;
@@ -271,6 +310,26 @@ int sonic_init(){
 	sonic.standing[0].h = 65;
 	sonic.standing[0].w = 65;
 
+	sonic.standing[1].y = 0;
+	sonic.standing[1].x = 65;
+	sonic.standing[1].h = 65;
+	sonic.standing[1].w = 65;
+
+	sonic.standing[2].y = 0;
+	sonic.standing[2].x = 65 * 2;
+	sonic.standing[2].h = 65;
+	sonic.standing[2].w = 65;
+
+	sonic.standing[3].y = 0;
+	sonic.standing[3].x = 65 * 3;
+	sonic.standing[3].h = 65;
+	sonic.standing[3].w = 65;
+
+	sonic.standing[4].y = 0;
+	sonic.standing[4].x = 65 * 4;
+	sonic.standing[4].h = 65;
+	sonic.standing[4].w = 65;
+
 	// have sonic start at the lower left of the screen
 	sonic.location.x = 100;
 	sonic.location.y = ground_level();
@@ -286,5 +345,7 @@ int sonic_init(){
 			sonic.sonicrect[y][x].h = 65;
 		}
 	}
+
+
 
 }
