@@ -2,10 +2,6 @@ const int SCREEN_WIDTH = 1280;
 const int SCREEN_HEIGHT = 960;
 
 
-int ground_level(){
-	return SCREEN_HEIGHT - 65 - 50;
-}
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -13,8 +9,8 @@ int ground_level(){
 #include <SDL2/SDL_image.h>
 #include <math.h>
 #include <time.h>
+#include "terrain.c"
 #include "sonic_functions.c"
-
 
 int main(int arc, char *argv[]){
 
@@ -58,7 +54,11 @@ int main(int arc, char *argv[]){
 	// Initiate everything for Sonic
 	sonic_init();
 
+	// init the terrain
+	init_terrain(platforms);
+
 	sonic_stand();
+
 
 	while(gameisrunning){
 		while(SDL_PollEvent(&event)){
@@ -101,8 +101,11 @@ int main(int arc, char *argv[]){
 		sonic_get_next_sprite();
 		sonic_move();
 
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
+		draw_terrain(renderer, &platforms[0]);
+		
 		// copy whichever is the correct sprite to the renderer
 		switch(sonic.current_x_action){
 			case RUNNINGRIGHT:
