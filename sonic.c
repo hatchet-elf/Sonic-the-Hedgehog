@@ -14,8 +14,6 @@ const int SCREEN_HEIGHT = 960;
 
 int main(int arc, char *argv[]){
 
-	int x, y;
-
 	SDL_Window *window = NULL;
 	SDL_Surface *screensurface = NULL;
 	SDL_Surface *charactersurface = NULL;
@@ -43,7 +41,7 @@ int main(int arc, char *argv[]){
 		return 1;
 	}
 
-	// Initiate everything for SDl
+	// Initiate everything for SDL
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 	SDL_Event event;
 	charactersurface = IMG_Load("sonicsheet.png");
@@ -52,14 +50,29 @@ int main(int arc, char *argv[]){
 	const Uint8 *keyboardstate;
 
 	// Initiate everything for Sonic
-	sonic_init();
+	player sonic;
+	player_init(&sonic);
 
 	// init the terrain
-	init_terrain(platforms);
+	SDL_Rect platforms[20];
+	terrain_init(platforms);
 
-	sonic_stand();
+	player_stand(&sonic);
 
+/******* test code
+	SDL_Rect all_sprites[7][7];
+	 
+	// fill the array with all the sprites from the spritesheet
+	for(y = 0; y < 7; y++){
+		for(x = 0; x < 7; x++){
+			all_sprites[y][x].y = y * 65;
+			all_sprites[y][x].x = x * 65;
+			all_sprites[y][x].w = 65;
+			all_sprites[y][x].h = 65;
+		}
+	}
 
+*/
 	while(gameisrunning){
 		while(SDL_PollEvent(&event)){
 			switch(event.type){
@@ -70,16 +83,12 @@ int main(int arc, char *argv[]){
 
 			keyboardstate = SDL_GetKeyboardState(NULL);
 			
-			if(keyboardstate[SDL_SCANCODE_UP]){
-				sonic_stand();
-			}
-
 			if(keyboardstate[SDL_SCANCODE_RIGHT]){
-				sonic_start_running_right();
+				player_start_running_right(&sonic);
 			}
 
 			if(keyboardstate[SDL_SCANCODE_LEFT]){
-				sonic_start_running_left();
+				player_start_running_left(&sonic);
 			}
 
 			if(keyboardstate[SDL_SCANCODE_Q]){
@@ -87,33 +96,43 @@ int main(int arc, char *argv[]){
 			}
 
 			if(keyboardstate[SDL_SCANCODE_SPACE]){
-				sonic_jump();
+				player_jump(&sonic);
 			}
 			
-			if(!keyboardstate[SDL_SCANCODE_RIGHT] && !keyboardstate[SDL_SCANCODE_LEFT] && 
+			if((!keyboardstate[SDL_SCANCODE_RIGHT] && !keyboardstate[SDL_SCANCODE_LEFT]) && 
 					((sonic.current_x_action == RUNNINGLEFT) || (sonic.current_x_action == RUNNINGRIGHT))){
-				sonic_stand();
+				player_stand(&sonic);
 			}
-
-
 		}
 
-		sonic_get_next_sprite();
-		sonic_move();
+		player_get_next_sprite(&sonic);
+		player_move(&sonic);
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 
-		draw_terrain(renderer, &platforms[0]);
-		
-		// copy whichever is the correct sprite to the renderer
+		terrain_draw(renderer, &platforms[0]);
+
+		switch(sonic.current_y_action){
+			case JUMPING:
+				SDL_RenderCopy(renderer, sonicsprite, &sonic.jumping[0], &sonic.location);
+				break;
+		}
+
+		// Copy the next Sprite to the renderer
 		switch(sonic.current_x_action){
 			case RUNNINGRIGHT:
 				SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_index], &sonic.location);
 				break;
 
 			case STANDING:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_index], &sonic.location);
+				// Draw Sonic facing right or left
+				if(sonic.left_or_right_before_standing == RUNNINGRIGHT){
+					SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_index], &sonic.location);
+				}else{
+					SDL_RenderCopyEx(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
+				}
+
 				break;
 
 			case RUNNINGLEFT:
@@ -122,11 +141,7 @@ int main(int arc, char *argv[]){
 
 		}
 
-		switch(sonic.current_y_action){
-			case JUMPING:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[0], &sonic.location);
-				break;
-		}
+		
 
 		SDL_RenderPresent(renderer);
 	}

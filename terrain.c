@@ -4,21 +4,19 @@
 #define COL_HEAD 3
 #define COL_BOTTOM 4
 
-SDL_Rect platforms[20];
-
-int on_the_ground(){
+int terrain_on_the_ground(){
         return SCREEN_HEIGHT - 65 - 50;
 }
 
-int ground_level(){
+int terrain_ground_level(){
         return SCREEN_HEIGHT - 65 - 50;
 }
 
-int in_the_air(){
+int terrain_in_the_air(){
 	return 1;
 }
 
-int init_terrain(SDL_Rect platforms[20]){
+int terrain_init(SDL_Rect platforms[20]){
 	platforms[0].x = 200;
 	platforms[0].y = SCREEN_HEIGHT - 200;
 	platforms[0].w = 400;
@@ -27,7 +25,7 @@ int init_terrain(SDL_Rect platforms[20]){
 	return 0;
 }
 
-int draw_terrain(SDL_Renderer *renderer, SDL_Rect *platforms){
+int terrain_draw(SDL_Renderer *renderer, SDL_Rect *platforms){
 	SDL_SetRenderDrawColor(renderer, 0, 100, 0, 0);
 	SDL_RenderFillRect(renderer, platforms);
 
@@ -40,6 +38,6 @@ int draw_terrain(SDL_Renderer *renderer, SDL_Rect *platforms){
 // COL_RIGHT 
 // COL_HEAD 
 // COL_BOTTOM 
-int collission_with_platform(SDL_Rect platforms[0]){
+int terrain_collission_with_platform(SDL_Rect platforms[0]){
 	return 0;
 }
