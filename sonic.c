@@ -113,35 +113,46 @@ int main(int arc, char *argv[]){
 
 		terrain_draw(renderer, &platforms[0]);
 
+		if(sonic.current_y_action == JUMPING)
+		{
+			if(sonic.current_x_action == RUNNINGRIGHT)
+			{
+				SDL_RenderCopy(renderer, sonicsprite, &sonic.jumping[sonic.current_sprite_jump_index], &sonic.location);
+			}else{
+				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.jumping[sonic.current_sprite_jump_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
+			}
+		}
+
+		if(sonic.current_y_action != JUMPING)
+		{
+			// Copy the next Sprite to the renderer
+			switch(sonic.current_x_action){
+				case RUNNINGRIGHT:
+					SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_running_index], &sonic.location);
+					break;
+
+				case RUNNINGLEFT:
+					SDL_RenderCopyEx(renderer, sonicsprite, &sonic.running[sonic.current_sprite_running_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
+					break;
+
+				case STANDING:
+					// Draw Sonic facing right or left
+					if(sonic.left_or_right_before_standing == RUNNINGRIGHT){
+						SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_standing_index], &sonic.location);
+					}else{
+						SDL_RenderCopyEx(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_standing_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
+					}
+					break;
+			}
+		}
+/*
 		switch(sonic.current_y_action){
 			case JUMPING:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.jumping[0], &sonic.location);
+				SDL_RenderCopy(renderer, sonicsprite, &sonic.jumping[sonic.current_sprite_jump_index], &sonic.location);
 				break;
 		}
-
-		// Copy the next Sprite to the renderer
-		switch(sonic.current_x_action){
-			case RUNNINGRIGHT:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_index], &sonic.location);
-				break;
-
-			case STANDING:
-				// Draw Sonic facing right or left
-				if(sonic.left_or_right_before_standing == RUNNINGRIGHT){
-					SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_index], &sonic.location);
-				}else{
-					SDL_RenderCopyEx(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
-				}
-
-				break;
-
-			case RUNNINGLEFT:
-				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.running[sonic.current_sprite_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
-				break;
-
-		}
-
-		
+*/
+	
 
 		SDL_RenderPresent(renderer);
 	}
@@ -152,4 +163,3 @@ int main(int arc, char *argv[]){
 
 	return 0;
 }
-

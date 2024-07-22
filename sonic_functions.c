@@ -48,7 +48,10 @@ typedef struct {
 	int current_y_action;
 
 	// the index of the current sprite in the current action
-	int current_sprite_index;
+	//int current_sprite_index;
+	int current_sprite_jump_index;
+	int current_sprite_running_index;
+	int current_sprite_standing_index;
 
 	// used to store the location and time when the player starts running
 	int running_start_x;
@@ -80,6 +83,7 @@ int player_start_running_right(player *sprite){
 	// store where Sonic is when he starts running
 	sprite->running_start_x = sprite->location.x;
 	sprite->running_start_x_time = SDL_GetTicks();
+	sprite->current_sprite_running_index = 0;
 
 
 	return 0;
@@ -96,6 +100,7 @@ int player_start_running_left(player *sprite){
 	// store where Sonic is when he starts running
 	sprite->running_start_x = sprite->location.x;
 	sprite->running_start_x_time = SDL_GetTicks();
+	sprite->current_sprite_running_index = 0;
 
 	return 0;
 }
@@ -112,7 +117,7 @@ int player_jump(player *sprite){
 	// store where Sonic is when he starts 
 	sprite->jump_y = sprite->location.y;
 	sprite->jump_start_time = SDL_GetTicks();
-	sprite->current_sprite_index = 0;
+	sprite->current_sprite_jump_index = 0;
 
 	sprite->jump_velocity = JUMP_VELOCITY;
 
@@ -133,7 +138,7 @@ int player_stand(player *sprite){
 	sprite->left_or_right_before_standing = sprite->current_x_action;
 
 	sprite->current_x_action = STANDING;
-	sprite->current_sprite_index = 0;
+	sprite->current_sprite_standing_index = 0;
 
 	return sprite->left_or_right_before_standing;
 }
@@ -145,57 +150,14 @@ int player_get_next_sprite(player *sprite){
 	end = SDL_GetTicks();
 	elapsed_time = end - sprite->last_frame_timer;
 	
-	switch(sprite->current_x_action){
-		case RUNNINGRIGHT:
-
-			// This code works by calculating the time from the last frame and only animating the next frame
-			// once TIME_BETWEEN_RUNNING_FRAMES has passed
-			// This is using SDL_GetTicks() which is accurate to a millisecond
-			// So it will be out slightly however it should not be noticeable to the player
-			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
-				if(sprite->current_sprite_index == 7){
-					       sprite->current_sprite_index = 0;
-					} else {
-						sprite->current_sprite_index++;
-					}
-				sprite->last_frame_timer = SDL_GetTicks();
-			}
-			break;
-
-		case RUNNINGLEFT:
-
-			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
-				if(sprite->current_sprite_index == 7){
-					       sprite->current_sprite_index = 0;
-					} else {
-						sprite->current_sprite_index++;
-					}
-				sprite->last_frame_timer = SDL_GetTicks();
-			}
-			break;
-
-		case STANDING:
-			if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES){
-				if(sprite->current_sprite_index == 4){
-					       sprite->current_sprite_index = 0;
-					} else {
-						sprite->current_sprite_index++;
-					}
-
-				sprite->last_frame_timer = SDL_GetTicks();
-			}
-		break;
-
-	}
-
 	switch(sprite->current_y_action){
 		case JUMPING:
 			if(elapsed_time > TIME_BETWEEN_JUMPING_FRAMES){
-				if(sprite->current_sprite_index == 5){
-					       sprite->current_sprite_index = 0;
-					} else {
-						sprite->current_sprite_index++;
-					}
+				sprite->current_sprite_jump_index++;
+
+				if(sprite->current_sprite_jump_index >= 4){
+					       sprite->current_sprite_jump_index = 0;
+					} 
 
 				sprite->last_frame_timer = SDL_GetTicks();
 			}
@@ -204,7 +166,53 @@ int player_get_next_sprite(player *sprite){
 		case FALLING:
 			break;
 
+		return 0;
 	}
+
+	switch(sprite->current_x_action){
+		case RUNNINGRIGHT:
+
+			// This code works by calculating the time from the last frame and only animating the next frame
+			// once TIME_BETWEEN_RUNNING_FRAMES has passed
+			// This is using SDL_GetTicks() which is accurate to a millisecond
+			// So it will be out slightly however it should not be noticeable to the player
+			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
+				if(sprite->current_sprite_running_index == 7){
+					       sprite->current_sprite_running_index = 0;
+					} else {
+						sprite->current_sprite_running_index++;
+					}
+				sprite->last_frame_timer = SDL_GetTicks();
+			}
+			break;
+
+		case RUNNINGLEFT:
+
+			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
+				if(sprite->current_sprite_running_index == 7){
+					       sprite->current_sprite_running_index = 0;
+					} else {
+						sprite->current_sprite_running_index++;
+					}
+				sprite->last_frame_timer = SDL_GetTicks();
+			}
+			break;
+
+		case STANDING:
+			if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES){
+				if(sprite->current_sprite_standing_index == 4){
+					       sprite->current_sprite_standing_index = 0;
+					} else {
+						sprite->current_sprite_standing_index++;
+					}
+
+				sprite->last_frame_timer = SDL_GetTicks();
+			}
+		break;
+
+		return 0;
+	}
+
 
 	return 0;
 }
@@ -343,34 +351,24 @@ int player_init(player *sprite){
 	
 	// setup the frames for the player jumping
 	sprite->jumping[0].y = 65 * 4;
-	sprite->jumping[0].x = 65 * 6;
+	sprite->jumping[0].x = 65;
 	sprite->jumping[0].h = 65;
 	sprite->jumping[0].w = 65;
 
 	sprite->jumping[1].y = 65 * 4;
-	sprite->jumping[1].x = 65 * 5;
+	sprite->jumping[1].x = 65 * 2;
 	sprite->jumping[1].h = 65;
 	sprite->jumping[1].w = 65;
 
 	sprite->jumping[2].y = 65 * 4;
-	sprite->jumping[2].x = 65;
+	sprite->jumping[2].x = 65 * 3;
 	sprite->jumping[2].h = 65;
 	sprite->jumping[2].w = 65;
 
 	sprite->jumping[3].y = 65 * 4;
-	sprite->jumping[3].x = 65 * 2;
+	sprite->jumping[3].x = 65 * 4;
 	sprite->jumping[3].h = 65;
 	sprite->jumping[3].w = 65;
-
-	sprite->jumping[4].y = 65 * 4;
-	sprite->jumping[4].x = 65 * 3;
-	sprite->jumping[4].h = 65;
-	sprite->jumping[4].w = 65;
-
-	sprite->jumping[5].y = 65 * 4;
-	sprite->jumping[5].x = 65 * 4;
-	sprite->jumping[5].h = 65;
-	sprite->jumping[5].w = 65;
 
 	// have sonic start at the lower left of the screen
 	sprite->location.x = 100;
