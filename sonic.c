@@ -12,7 +12,8 @@ const int SCREEN_HEIGHT = 960;
 #include "terrain.c"
 #include "sonic_functions.c"
 
-int main(int arc, char *argv[]){
+int main(int arc, char *argv[])
+{
 
 	SDL_Window *window = NULL;
 	SDL_Surface *screensurface = NULL;
@@ -21,11 +22,9 @@ int main(int arc, char *argv[]){
 	SDL_Texture *sonicsprite = NULL;
 	bool gameisrunning = true;
 
-	if(SDL_Init(SDL_INIT_VIDEO) == 0){
-		printf("Video init succesful\n");
-	}else{
-		printf("Vido init failed\n");
-	return 2;
+	if(SDL_Init(SDL_INIT_VIDEO) != 0){
+		printf("Video init failed\n");
+		return 2;
 	}
 
 	window = SDL_CreateWindow("Sonic",
@@ -36,7 +35,8 @@ int main(int arc, char *argv[]){
 			SDL_WINDOW_SHOWN
 	);
 
-	if(window == NULL){
+	if(window == NULL)
+	{
 		printf("Couldn't create window\n");
 		return 1;
 	}
@@ -73,8 +73,10 @@ int main(int arc, char *argv[]){
 	}
 
 */
-	while(gameisrunning){
-		while(SDL_PollEvent(&event)){
+	while(gameisrunning)
+{
+		while(SDL_PollEvent(&event))
+		{
 			switch(event.type){
 				case SDL_QUIT:
 					gameisrunning = false;
@@ -83,24 +85,29 @@ int main(int arc, char *argv[]){
 
 			keyboardstate = SDL_GetKeyboardState(NULL);
 			
-			if(keyboardstate[SDL_SCANCODE_RIGHT]){
+			if(keyboardstate[SDL_SCANCODE_RIGHT])
+			{
 				player_start_running_right(&sonic);
 			}
 
-			if(keyboardstate[SDL_SCANCODE_LEFT]){
+			if(keyboardstate[SDL_SCANCODE_LEFT])
+			{
 				player_start_running_left(&sonic);
 			}
 
-			if(keyboardstate[SDL_SCANCODE_Q]){
+			if(keyboardstate[SDL_SCANCODE_Q])
+			{
 				gameisrunning = false;
 			}
 
-			if(keyboardstate[SDL_SCANCODE_SPACE]){
+			if(keyboardstate[SDL_SCANCODE_SPACE])
+			{
 				player_jump(&sonic);
 			}
 			
 			if((!keyboardstate[SDL_SCANCODE_RIGHT] && !keyboardstate[SDL_SCANCODE_LEFT]) && 
-					((sonic.current_x_action == RUNNINGLEFT) || (sonic.current_x_action == RUNNINGRIGHT))){
+					((sonic.current_x_action == RUNNINGLEFT) || (sonic.current_x_action == RUNNINGRIGHT)))
+			{
 				player_stand(&sonic);
 			}
 		}
@@ -118,7 +125,9 @@ int main(int arc, char *argv[]){
 			if(sonic.current_x_action == RUNNINGRIGHT)
 			{
 				SDL_RenderCopy(renderer, sonicsprite, &sonic.jumping[sonic.current_sprite_jump_index], &sonic.location);
-			}else{
+			}
+			if(sonic.current_x_action != RUNNINGRIGHT)
+			{
 				SDL_RenderCopyEx(renderer, sonicsprite, &sonic.jumping[sonic.current_sprite_jump_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
 			}
 		}
@@ -126,7 +135,8 @@ int main(int arc, char *argv[]){
 		if(sonic.current_y_action != JUMPING)
 		{
 			// Copy the next Sprite to the renderer
-			switch(sonic.current_x_action){
+			switch(sonic.current_x_action)
+			{
 				case RUNNINGRIGHT:
 					SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_running_index], &sonic.location);
 					break;
@@ -137,22 +147,17 @@ int main(int arc, char *argv[]){
 
 				case STANDING:
 					// Draw Sonic facing right or left
-					if(sonic.left_or_right_before_standing == RUNNINGRIGHT){
+					if(sonic.left_or_right_before_standing == RUNNINGRIGHT)
+					{
 						SDL_RenderCopy(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_standing_index], &sonic.location);
-					}else{
+					}
+					if(sonic.left_or_right_before_standing != RUNNINGRIGHT)
+					{
 						SDL_RenderCopyEx(renderer, sonicsprite, &sonic.standing[sonic.current_sprite_standing_index], &sonic.location, 0, NULL, SDL_FLIP_HORIZONTAL);
 					}
 					break;
 			}
 		}
-/*
-		switch(sonic.current_y_action){
-			case JUMPING:
-				SDL_RenderCopy(renderer, sonicsprite, &sonic.jumping[sonic.current_sprite_jump_index], &sonic.location);
-				break;
-		}
-*/
-	
 
 		SDL_RenderPresent(renderer);
 	}

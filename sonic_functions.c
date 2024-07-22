@@ -24,9 +24,9 @@
 #define TOPOFJUMP 6
 #define	STARTFALLING 7
 #define FALLING 8
-#define ONTHEGROUND 9
 
-typedef struct {
+typedef struct 
+{
 	// stores players location
 	SDL_Rect location;
 
@@ -74,8 +74,10 @@ typedef struct {
 } player;
 
 
-int player_start_running_right(player *sprite){
-	if(sprite->current_x_action == RUNNINGRIGHT){
+int player_start_running_right(player *sprite)
+{
+	if(sprite->current_x_action == RUNNINGRIGHT)
+	{
 		return 0;
 	}
 	sprite->current_x_action = RUNNINGRIGHT;
@@ -85,13 +87,13 @@ int player_start_running_right(player *sprite){
 	sprite->running_start_x_time = SDL_GetTicks();
 	sprite->current_sprite_running_index = 0;
 
-
 	return 0;
-
 }
 
-int player_start_running_left(player *sprite){
-	if(sprite->current_x_action == RUNNINGLEFT){
+int player_start_running_left(player *sprite)
+{
+	if(sprite->current_x_action == RUNNINGLEFT)
+	{
 		return 0;
 	}
 
@@ -105,12 +107,13 @@ int player_start_running_left(player *sprite){
 	return 0;
 }
 
-int player_jump(player *sprite){
+int player_jump(player *sprite)
+{
 	// if the player is not on the ground then don't do anything
-	if(sprite->location.y != terrain_ground_level()){
+	if(sprite->location.y != terrain_ground_level())
+	{
 		return 0;
 	}
-
 
 	sprite->current_y_action = JUMPING;
 
@@ -122,16 +125,17 @@ int player_jump(player *sprite){
 	sprite->jump_velocity = JUMP_VELOCITY;
 
 	return 0;
-
 }
 
 // returns RUNNINGRIGHT if the player should be facing to the right
 // returns RUNNINGLEFT if the player should be facing left
 // This is so that when the function is called you have an easy way of knowing which way the player was facing
 // the variable sprite->left_or_right_before_standing is also set
-int player_stand(player *sprite){
+int player_stand(player *sprite)
+{
 
-	if(sprite->current_y_action == (JUMPING || FALLING)){
+	if(sprite->current_y_action == (JUMPING || FALLING))
+	{
 		return 0;
 	}
 
@@ -143,21 +147,24 @@ int player_stand(player *sprite){
 	return sprite->left_or_right_before_standing;
 }
 
-int player_get_next_sprite(player *sprite){
+int player_get_next_sprite(player *sprite)
+{
 	Uint32 elapsed_time;
 	Uint32 end;
 
 	end = SDL_GetTicks();
 	elapsed_time = end - sprite->last_frame_timer;
 	
-	switch(sprite->current_y_action){
+	switch(sprite->current_y_action)
+	{
 		case JUMPING:
-			if(elapsed_time > TIME_BETWEEN_JUMPING_FRAMES){
+			if(elapsed_time > TIME_BETWEEN_JUMPING_FRAMES)
+			{
 				sprite->current_sprite_jump_index++;
-
-				if(sprite->current_sprite_jump_index >= 4){
+				if(sprite->current_sprite_jump_index >= 4)
+				{
 					       sprite->current_sprite_jump_index = 0;
-					} 
+				} 
 
 				sprite->last_frame_timer = SDL_GetTicks();
 			}
@@ -169,42 +176,48 @@ int player_get_next_sprite(player *sprite){
 		return 0;
 	}
 
-	switch(sprite->current_x_action){
+	switch(sprite->current_x_action)
+	{
 		case RUNNINGRIGHT:
 
 			// This code works by calculating the time from the last frame and only animating the next frame
 			// once TIME_BETWEEN_RUNNING_FRAMES has passed
 			// This is using SDL_GetTicks() which is accurate to a millisecond
 			// So it will be out slightly however it should not be noticeable to the player
-			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
-				if(sprite->current_sprite_running_index == 7){
+			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES)
+			{
+				sprite->current_sprite_running_index++;
+				if(sprite->current_sprite_running_index > 7)
+				{
 					       sprite->current_sprite_running_index = 0;
-					} else {
-						sprite->current_sprite_running_index++;
-					}
+				} 
+
 				sprite->last_frame_timer = SDL_GetTicks();
 			}
 			break;
 
 		case RUNNINGLEFT:
 
-			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES){
-				if(sprite->current_sprite_running_index == 7){
-					       sprite->current_sprite_running_index = 0;
-					} else {
-						sprite->current_sprite_running_index++;
-					}
+			if(elapsed_time > TIME_BETWEEN_RUNNING_FRAMES)
+			{
+				sprite->current_sprite_running_index++;
+				if(sprite->current_sprite_running_index > 7)
+				{
+				       sprite->current_sprite_running_index = 0;
+				} 
+
 				sprite->last_frame_timer = SDL_GetTicks();
 			}
 			break;
 
 		case STANDING:
-			if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES){
-				if(sprite->current_sprite_standing_index == 4){
-					       sprite->current_sprite_standing_index = 0;
-					} else {
-						sprite->current_sprite_standing_index++;
-					}
+			if(elapsed_time > TIME_BETWEEN_STANDING_FRAMES)
+			{
+				sprite->current_sprite_standing_index++;
+				if(sprite->current_sprite_standing_index == 4)
+				{
+				       sprite->current_sprite_standing_index = 0;
+				}
 
 				sprite->last_frame_timer = SDL_GetTicks();
 			}
@@ -212,14 +225,12 @@ int player_get_next_sprite(player *sprite){
 
 		return 0;
 	}
-
-
 	return 0;
 }
 
 
-
-int player_move(player *sprite){
+int player_move(player *sprite)
+{
 	float y = 0;
 	float x = 0;
 	Uint32 end_jump_time;
@@ -233,18 +244,19 @@ int player_move(player *sprite){
 	// If statements are used rather than a switch statement
 	// The reason is that there may be more than one statement that gets used
 	// For example: jumping whilst running
-	if(sprite->current_x_action == RUNNINGRIGHT){
+	if(sprite->current_x_action == RUNNINGRIGHT)
+	{
 
 		end_run_time = SDL_GetTicks();
 		elapsed_run_time = end_run_time - sprite->running_start_x_time;
+
 		x = (float)sprite->running_start_x + (float)(elapsed_run_time / RUNNING_SPEED);
 
 		sprite->location.x = (int)x;
-
 	}
 
-	if(sprite->current_x_action == RUNNINGLEFT){
-
+	if(sprite->current_x_action == RUNNINGLEFT)
+	{
 		end_run_time = SDL_GetTicks();
 		elapsed_run_time = end_run_time - sprite->running_start_x_time;
 		x = (float)sprite->running_start_x - (float)(elapsed_run_time / RUNNING_SPEED);
@@ -252,7 +264,8 @@ int player_move(player *sprite){
 		sprite->location.x = (int)x;
 	}
 
-	if(sprite->current_y_action == JUMPING){
+	if(sprite->current_y_action == JUMPING)
+	{
 
 		end_jump_time = SDL_GetTicks();
 		elapsed_jump_time = end_jump_time - sprite->jump_start_time;
@@ -264,23 +277,23 @@ int player_move(player *sprite){
 		sprite->location.y = (int)y;
 
 		// When the player gets to the ground then stand
-		if(sprite->location.y > terrain_on_the_ground()){
+		if(sprite->location.y > terrain_on_the_ground())
+		{
 			       sprite->current_y_action = STANDING;
 			       sprite->location.y = terrain_on_the_ground();
 		}
 	}
-
 	return 0;
 }
 
-int player_init(player *sprite){
+int player_init(player *sprite)
+{
 	int x, y;
 
 	memset(sprite, 0, sizeof(sprite));
 
 	sprite->last_frame_timer = SDL_GetTicks();
 	sprite->current_x_action = STANDING;
-	sprite->current_y_action = ONTHEGROUND;
 
 	// setup all the frames for sonic running
 	sprite->running[0].y = 0;
