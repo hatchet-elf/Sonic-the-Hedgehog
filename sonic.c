@@ -9,11 +9,14 @@ const int SCREEN_HEIGHT = 960;
 #include <SDL2/SDL_image.h>
 #include <math.h>
 #include <time.h>
+#include "player.h"
 #include "terrain.c"
-#include "sonic_functions.c"
+#include "sonic_engine.c"
 
 int main(int arc, char *argv[])
 {
+
+	int temp = 0;
 
 	SDL_Window *window = NULL;
 	SDL_Surface *screensurface = NULL;
@@ -54,8 +57,8 @@ int main(int arc, char *argv[])
 	player_init(&sonic);
 
 	// init the terrain
-	SDL_Rect platforms[20];
-	terrain_init(platforms);
+	terrain *level;
+	level = terrain_init();
 
 	player_stand(&sonic);
 
@@ -75,6 +78,7 @@ int main(int arc, char *argv[])
 */
 	while(gameisrunning)
 {
+		// handle keyboard input
 		while(SDL_PollEvent(&event))
 		{
 			switch(event.type){
@@ -112,14 +116,19 @@ int main(int arc, char *argv[])
 			}
 		}
 
+		// get next sprite
+		// move Sonic
+		// check for any collissions
 		player_get_next_sprite(&sonic);
 		player_move(&sonic);
+		terrain_collission(&sonic, level);
 
+		// draw the terrain
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
+		terrain_draw(renderer, level);
 
-		terrain_draw(renderer, &platforms[0]);
-
+		// draw the player
 		if(sonic.current_y_action == JUMPING)
 		{
 			if(sonic.current_x_action == RUNNINGRIGHT)
@@ -139,6 +148,7 @@ int main(int arc, char *argv[])
 			{
 				case RUNNINGRIGHT:
 					SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_running_index], &sonic.location);
+					printf("sprite_index: %d\n", sonic.current_sprite_running_index);
 					break;
 
 				case RUNNINGLEFT:
@@ -165,6 +175,9 @@ int main(int arc, char *argv[])
 	SDL_FreeSurface(charactersurface);
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+
+
+	terrain_free(level);
 
 	return 0;
 }
