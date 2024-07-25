@@ -15,8 +15,9 @@
 #define TIME_BETWEEN_STANDING_FRAMES 100
 #define TIME_BETWEEN_JUMPING_FRAMES 50
 
-#define GRAVITY .0004
+#define GRAVITY .001
 #define JUMP_VELOCITY 1.9
+#define FALL_VELOCITY 1.9
 
 #define RUNNINGRIGHT 0
 #define RUNNINGLEFT 1
@@ -69,10 +70,14 @@ typedef struct
         Uint32 run_x;
         Uint32 run_start_time;
 
+	Uint32 fall_y;
+	Uint32 fall_start_time;
+	float fall_velocity;
+
         // This is set to the below values when the stand() function is called
         // RUNNINGRIGHT - the player was facing to the right before stand() was called
         // RUNNINGLEFT - the player was facing to the left before stand() was called
         int left_or_right_before_standing;
 
-} player;
 
+} player;

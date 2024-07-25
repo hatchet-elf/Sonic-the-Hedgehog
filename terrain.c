@@ -1,7 +1,7 @@
 #define COL_NONE 0
 #define COL_LEFT 1
 #define COL_RIGHT 2
-#define COL_HEAD 3
+#define COL_TOP 3
 #define COL_BOTTOM 4
 
 typedef struct
@@ -29,47 +29,113 @@ terrain *terrain_init()
 	level = (terrain*)malloc(sizeof(terrain));
 	memset(level, 0, sizeof(terrain));
 
-	level->platform_count - 20;
+	level->platform_count = 2;
 
 	level->platforms[0].x = 200;
 	level->platforms[0].y = SCREEN_HEIGHT - 200;
 	level->platforms[0].w = 400;
 	level->platforms[0].h = 30;
 
+	level->platforms[1].x = 0;
+	level->platforms[1].y = SCREEN_HEIGHT - 10;
+	level->platforms[1].w = SCREEN_WIDTH;
+	level->platforms[1].h = 30;
+
 	return level;
 }
 
 int terrain_draw(SDL_Renderer *renderer, terrain *level){
-	SDL_SetRenderDrawColor(renderer, 0, 100, 0, 0);
-	SDL_RenderFillRect(renderer, &level->platforms[0]);
+	int x;
+
+	for(x = 0; x < level->platform_count; x++)
+	{
+		SDL_SetRenderDrawColor(renderer, 0, 100, 0, 0);
+		SDL_RenderFillRect(renderer, &level->platforms[x]);
+
+	}
 
 	return 0;
 }
 
-// this returns an int specifying the collisson that Sonic has experienced
+// this returns an int specifying side of a platform that Sonic has colided with
 // COL_NONE - No collission
 // COL_LEFT 
 // COL_RIGHT 
-// COL_HEAD 
+// COL_TOP 
 // COL_BOTTOM 
 int terrain_collission(player *sonic, terrain *level){
 	int x;
 
-	// if Sonic has crossed the top of a platform
-	if((sonic->location.x + 44) > level->platforms[0].x && (sonic->location.x + 44 < (level->platforms[0].x + level->platforms[0].w))) 
+	for(x = 0; x < level->platform_count; x++)
 	{
-		if((sonic->location.y + 47 > level->platforms[0].y) && (sonic->location.y + 47 < level->platforms[0].y + level->platforms[0].h))
+	
+	// Collission with the top of a platform
+	if(sonic->location.x + 100 > level->platforms[x].x && (sonic->location.x < (level->platforms[x].x + level->platforms[x].w))) 
+	{
+		if((sonic->location.y + 100 > level->platforms[x].y) && (sonic->location.y + 100 < level->platforms[x].y + level->platforms[x].h))
 		{
-			sonic->location.y = level->platforms[0].y - SONIC_HEIGHT;
+			sonic->location.y = level->platforms[x].y - SONIC_HEIGHT;
 			sonic->current_y_action = STANDING;
-			printf("location.y %d\n: ", sonic->location.y);
-			printf("level->platforms[0].y: %d\n", level->platforms[0].y);
+
+			printf("COL_TOP\n");
+
+			return COL_TOP;
+		}
+	}
+
+	// Collission with the bottom of a platform
+	if(sonic->location.x + 100 > level->platforms[x].x && (sonic->location.x < (level->platforms[x].x + level->platforms[x].w))) 
+	{
+		if((sonic->location.y > level->platforms[x].y) && (sonic->location.y < level->platforms[x].y + level->platforms[x].h))
+		{
+			sonic->location.y = level->platforms[x].y + level->platforms[x].h;
+			sonic->current_y_action = FALLING;
+
+			printf("COL_BOTTOM\n");
 
 			return COL_BOTTOM;
 		}
 	}
 
-	return 0;
+	// Collission with the right hand side of a platform
+	if(sonic->location.x < (level->platforms[x].x + level->platforms[x].w) && sonic->location.x > level->platforms[x].x) 
+	{
+		if((sonic->location.y + 100 > level->platforms[x].y) && (sonic->location.y < level->platforms[x].y + level->platforms[x].h))
+		{
+			sonic->location.x = level->platforms[x].x + level->platforms[x].w;
+			sonic->current_y_action = FALLING;
+
+			printf("COL_RIGHT\n");
+
+			return COL_RIGHT;
+		}
+	}
+
+	// Collission with the left hand side of a platform
+	if(sonic->location.x + 100 > level->platforms[x].x && sonic->location.x + 100 < level->platforms[x].x + level->platforms[x].w) 
+	{
+		if((sonic->location.y + 100 > level->platforms[x].y) && (sonic->location.y + 100 < level->platforms[x].y + level->platforms[x].h))
+		{
+			sonic->location.x = level->platforms[x].x  - 100;
+			sonic->current_y_action = FALLING;
+
+			printf("COL_LEFT\n");
+
+			return COL_LEFT;
+		}
+	}
+
+	// No collission
+	if(sonic->location.x + 44 < level->platforms[x].x || sonic->location.x > level->platforms[x].x + level->platforms[x].w)
+	{
+		if(sonic->location.y + 47 < level->platforms[x].y || sonic->location.y > level->platforms[x].y + level->platforms[x].y + level->platforms[x].h)
+		{
+			return COL_NONE;
+		}
+	}
+	}
+
+	return 2;
 }
 
 int terrain_free(terrain *level)

@@ -18,6 +18,8 @@ int main(int arc, char *argv[])
 
 	int temp = 0;
 
+	bool draw_collission_squares = false;
+
 	SDL_Window *window = NULL;
 	SDL_Surface *screensurface = NULL;
 	SDL_Surface *charactersurface = NULL;
@@ -60,7 +62,7 @@ int main(int arc, char *argv[])
 	terrain *level;
 	level = terrain_init();
 
-	player_stand(&sonic);
+	player_fall(&sonic);
 
 /******* test code
 	SDL_Rect all_sprites[7][7];
@@ -84,6 +86,18 @@ int main(int arc, char *argv[])
 			switch(event.type){
 				case SDL_QUIT:
 					gameisrunning = false;
+					break;
+					
+				case SDL_KEYDOWN:
+					if(event.key.keysym.sym == SDLK_s)
+					{
+						if(draw_collission_squares)
+						{
+							draw_collission_squares = false;
+							break;
+						}
+					draw_collission_squares = true;
+					}
 					break;
 			}
 
@@ -121,7 +135,15 @@ int main(int arc, char *argv[])
 		// check for any collissions
 		player_get_next_sprite(&sonic);
 		player_move(&sonic);
-		terrain_collission(&sonic, level);
+
+		if(terrain_collission(&sonic, level) == COL_NONE)
+		{
+			if(sonic.current_y_action != JUMPING)
+			{
+				player_fall(&sonic);
+			}
+		}
+				
 
 		// draw the terrain
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
@@ -148,7 +170,6 @@ int main(int arc, char *argv[])
 			{
 				case RUNNINGRIGHT:
 					SDL_RenderCopy(renderer, sonicsprite, &sonic.running[sonic.current_sprite_running_index], &sonic.location);
-					printf("sprite_index: %d\n", sonic.current_sprite_running_index);
 					break;
 
 				case RUNNINGLEFT:
@@ -167,6 +188,11 @@ int main(int arc, char *argv[])
 					}
 					break;
 			}
+		}
+
+		if(draw_collission_squares)
+		{
+			SDL_RenderDrawRect(renderer, &sonic.location);
 		}
 
 		SDL_RenderPresent(renderer);

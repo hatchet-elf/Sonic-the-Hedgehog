@@ -1,4 +1,3 @@
-
 int player_start_running_right(player *sprite)
 {
 	if(sprite->current_x_action == RUNNINGRIGHT)
@@ -34,12 +33,13 @@ int player_start_running_left(player *sprite)
 
 int player_jump(player *sprite)
 {
+/*
 	// if the player is not on the ground then don't do anything
 	if(sprite->location.y != terrain_ground_level())
 	{
 		return 0;
 	}
-
+*/
 	sprite->current_y_action = JUMPING;
 
 	// store where Sonic is when he starts 
@@ -70,6 +70,22 @@ int player_stand(player *sprite)
 	sprite->current_sprite_standing_index = 0;
 
 	return sprite->left_or_right_before_standing;
+}
+
+int player_fall(player *sprite)
+{
+	if(sprite->current_y_action == JUMPING)
+	{
+		return 0;
+	}
+	
+	sprite->current_y_action = FALLING;
+	sprite->fall_y = sprite->location.y;
+	sprite->fall_start_time = SDL_GetTicks();
+
+	sprite->fall_velocity = FALL_VELOCITY;
+
+	return 0;
 }
 
 int player_get_next_sprite(player *sprite)
@@ -200,13 +216,19 @@ int player_move(player *sprite)
 		y = (float)sprite->jump_y - (float)(elapsed_jump_time * sprite->jump_velocity);
 		sprite->jump_velocity = sprite->jump_velocity - GRAVITY;
 		sprite->location.y = (int)y;
-		
+	/*	
 		// When the player gets to the ground then stand
 		if(sprite->location.y > terrain_on_the_ground())
 		{
 			       sprite->current_y_action = STANDING;
 			       sprite->location.y = terrain_on_the_ground();
 		}
+		*/
+	}
+
+	if(sprite->current_y_action == FALLING)
+	{
+		sprite->location.y = sprite->location.y + 1;
 	}
 	return 0;
 }
