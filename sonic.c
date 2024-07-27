@@ -62,6 +62,7 @@ int main(int arc, char *argv[])
 	terrain *level;
 	level = terrain_init();
 
+	player_stand(&sonic);
 	player_fall(&sonic);
 
 /******* test code
@@ -79,7 +80,7 @@ int main(int arc, char *argv[])
 
 */
 	while(gameisrunning)
-{
+	{
 		// handle keyboard input
 		while(SDL_PollEvent(&event))
 		{
@@ -144,12 +145,12 @@ int main(int arc, char *argv[])
 			}
 		}
 				
-
 		// draw the terrain
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
 		terrain_draw(renderer, level);
 
+		//printf("sonic.x: %d  sonic.y:%d  sonic.h%d  sonic.w%d\n", sonic.location.x, sonic.location.y, sonic.location.h, sonic.location.w);
 		// draw the player
 		if(sonic.current_y_action == JUMPING)
 		{

@@ -239,6 +239,9 @@ int player_init(player *sprite)
 
 	memset(sprite, 0, sizeof(sprite));
 
+	sprite->height = 100;
+	sprite->width = 100;
+
 	sprite->last_frame_timer = SDL_GetTicks();
 	sprite->current_x_action = STANDING;
 
@@ -333,7 +336,7 @@ int player_init(player *sprite)
 	// have sonic start at the lower left of the screen
 	sprite->location.x = 100;
 	sprite->location.y = terrain_ground_level();
-	sprite->location.w = SONIC_WIDTH; //sonicrect[0][0].w;
-	sprite->location.h = SONIC_HEIGHT; //sonicrect[0][0].h;
+	sprite->location.w = 100;
+	sprite->location.h = 100;
 
 }

@@ -7,6 +7,8 @@
 #include <math.h>
 #include <time.h>
 
+#define PLAYER_HEIGHT 100
+#define PLAYER_WIDTH 100
 #define SONIC_HEIGHT 100
 #define SONIC_WIDTH 100
 
@@ -31,6 +33,9 @@
 
 typedef struct
 {
+	int height;
+	int width;
+
         // stores players location
         SDL_Rect location;
 
