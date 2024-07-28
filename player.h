@@ -33,9 +33,6 @@
 
 typedef struct
 {
-	int height;
-	int width;
-
         // stores players location
         SDL_Rect location;
 

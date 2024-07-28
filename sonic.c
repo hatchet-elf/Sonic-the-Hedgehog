@@ -10,15 +10,15 @@ const int SCREEN_HEIGHT = 960;
 #include <math.h>
 #include <time.h>
 #include "player.h"
-#include "terrain.c"
-#include "sonic_engine.c"
+#include "map.c"
+#include "player_engine.c"
 
 int main(int arc, char *argv[])
 {
 
-	int temp = 0;
-
 	bool draw_collission_squares = false;
+	int collission_result;
+	const Uint8 *keyboardstate;
 
 	SDL_Window *window = NULL;
 	SDL_Surface *screensurface = NULL;
@@ -27,6 +27,7 @@ int main(int arc, char *argv[])
 	SDL_Texture *sonicsprite = NULL;
 	bool gameisrunning = true;
 
+	// Initiate everything for SDL
 	if(SDL_Init(SDL_INIT_VIDEO) != 0){
 		printf("Video init failed\n");
 		return 2;
@@ -46,24 +47,21 @@ int main(int arc, char *argv[])
 		return 1;
 	}
 
-	// Initiate everything for SDL
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 	SDL_Event event;
 	charactersurface = IMG_Load("sonicsheet.png");
 	sonicsprite = SDL_CreateTextureFromSurface(renderer, charactersurface);
 
-	const Uint8 *keyboardstate;
 
 	// Initiate everything for Sonic
 	player sonic;
 	player_init(&sonic);
 
-	// init the terrain
-	terrain *level;
-	level = terrain_init();
+	// init the map
+	map *level;
+	level = map_init();
 
 	player_stand(&sonic);
-	player_fall(&sonic);
 
 /******* test code
 	SDL_Rect all_sprites[7][7];
@@ -137,18 +135,39 @@ int main(int arc, char *argv[])
 		player_get_next_sprite(&sonic);
 		player_move(&sonic);
 
-		if(terrain_collission(&sonic, level) == COL_NONE)
+		collission_result = map_collission(&sonic.location, level);
+		switch(collission_result)
 		{
-			if(sonic.current_y_action != JUMPING)
-			{
-				player_fall(&sonic);
-			}
+			case COL_NONE:
+				if(sonic.current_y_action != JUMPING)
+				{
+					player_fall(&sonic);
+				}
+				break;
+
+			case COL_TOP:
+				sonic.current_y_action = STANDING;
+				break;
+
+			case COL_BOTTOM:
+				sonic.current_y_action = FALLING;
+				break;
+
+			case COL_RIGHT:
+				sonic.running_start_x = sonic.location.x;
+        			sonic.running_start_x_time = SDL_GetTicks();
+				break;
+
+			case COL_LEFT:
+				sonic.running_start_x = sonic.location.x;
+        			sonic.running_start_x_time = SDL_GetTicks();
+				break;
 		}
 				
-		// draw the terrain
+		// draw the map
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
-		terrain_draw(renderer, level);
+		map_draw(renderer, level);
 
 		//printf("sonic.x: %d  sonic.y:%d  sonic.h%d  sonic.w%d\n", sonic.location.x, sonic.location.y, sonic.location.h, sonic.location.w);
 		// draw the player
@@ -204,7 +223,7 @@ int main(int arc, char *argv[])
 	SDL_DestroyWindow(window);
 
 
-	terrain_free(level);
+	map_free(level);
 
 	return 0;
 }

@@ -1,0 +1,39 @@
+DONE  pass the SDL_Rect object of sonic to terrain_collission
+DONE correct each condition for collissions in collission();
+DONE rename terrain.c to map.c
+DONE rename the struct terrain to map
+put function declarations in the header files
+DONE fix left and right collissions so sonic can't run past them
+add comments where required
+
+Cyote time
+jump buffer
+clip onto a platform
+make the jump nicer
+make falling nicer
+
+have sonic stay spinning when he headbutts a platform
+
+add rings
+
+sound
+
+game controller
+
+platform grafix
+
+background
+
+scrolling
+
+intro screen
+
+points
+
+two player
+
+a couple of levels
+
+load a map from a file
+
+

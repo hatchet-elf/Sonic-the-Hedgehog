@@ -6,7 +6,7 @@ int player_start_running_right(player *sprite)
 	}
 	sprite->current_x_action = RUNNINGRIGHT;
 
-	// store where Sonic is when he starts running
+	// store where the player is when they starts running
 	sprite->running_start_x = sprite->location.x;
 	sprite->running_start_x_time = SDL_GetTicks();
 	sprite->current_sprite_running_index = 0;
@@ -23,7 +23,7 @@ int player_start_running_left(player *sprite)
 
 	sprite->current_x_action = RUNNINGLEFT;
 
-	// store where Sonic is when he starts running
+	// store where the player is when they start running along
 	sprite->running_start_x = sprite->location.x;
 	sprite->running_start_x_time = SDL_GetTicks();
 	sprite->current_sprite_running_index = 0;
@@ -40,9 +40,14 @@ int player_jump(player *sprite)
 		return 0;
 	}
 */
+
+	if(sprite->current_y_action == JUMPING)
+	{
+		return 0;
+	}
 	sprite->current_y_action = JUMPING;
 
-	// store where Sonic is when he starts 
+	// store where the player is when they start
 	sprite->jump_y = sprite->location.y;
 	sprite->jump_start_time = SDL_GetTicks();
 	sprite->current_sprite_jump_index = 0;
@@ -58,7 +63,6 @@ int player_jump(player *sprite)
 // the variable sprite->left_or_right_before_standing is also set
 int player_stand(player *sprite)
 {
-
 	if(sprite->current_y_action == (JUMPING || FALLING))
 	{
 		return 0;
@@ -207,23 +211,13 @@ int player_move(player *sprite)
 
 	if(sprite->current_y_action == JUMPING)
 	{
-
 		end_jump_time = SDL_GetTicks();
 		elapsed_jump_time = end_jump_time - sprite->jump_start_time;
 
 		// This code is the jump
-		// Very proud of this as I had to learn math that I didn't know existed
 		y = (float)sprite->jump_y - (float)(elapsed_jump_time * sprite->jump_velocity);
 		sprite->jump_velocity = sprite->jump_velocity - GRAVITY;
 		sprite->location.y = (int)y;
-	/*	
-		// When the player gets to the ground then stand
-		if(sprite->location.y > terrain_on_the_ground())
-		{
-			       sprite->current_y_action = STANDING;
-			       sprite->location.y = terrain_on_the_ground();
-		}
-		*/
 	}
 
 	if(sprite->current_y_action == FALLING)
@@ -237,15 +231,16 @@ int player_init(player *sprite)
 {
 	int x, y;
 
+	// edit these two lines to change the size of the sprite for the game
+	int sprite_height = 100;
+	int sprite_width = 100;
+
 	memset(sprite, 0, sizeof(sprite));
 
-	sprite->height = 100;
-	sprite->width = 100;
-
 	sprite->last_frame_timer = SDL_GetTicks();
-	sprite->current_x_action = STANDING;
+	sprite->current_x_action = RUNNINGRIGHT;
 
-	// setup all the frames for sonic running
+	// setup all the frames for running
 	sprite->running[0].y = 6;
 	sprite->running[0].x = 392;
 	sprite->running[0].h = 47;
@@ -333,10 +328,9 @@ int player_init(player *sprite)
 	sprite->jumping[3].h = 65;
 	sprite->jumping[3].w = 65;
 
-	// have sonic start at the lower left of the screen
+	// have the player start at the lower left of the screen
 	sprite->location.x = 100;
-	sprite->location.y = terrain_ground_level();
-	sprite->location.w = 100;
-	sprite->location.h = 100;
-
+	sprite->location.y = SCREEN_HEIGHT - 200;
+	sprite->location.h = sprite_height;
+	sprite->location.w = sprite_width;
 }
