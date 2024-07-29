@@ -19,7 +19,7 @@
 
 #define GRAVITY .001
 #define JUMP_VELOCITY 1.9
-#define FALL_VELOCITY 1.9
+#define FALL_VELOCITY 1.3
 
 #define RUNNINGRIGHT 0
 #define RUNNINGLEFT 1

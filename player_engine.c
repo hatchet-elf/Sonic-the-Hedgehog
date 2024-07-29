@@ -217,7 +217,8 @@ int player_move(player *sprite)
 		// This code is the jump
 		y = (float)sprite->jump_y - (float)(elapsed_jump_time * sprite->jump_velocity);
 		sprite->jump_velocity = sprite->jump_velocity - GRAVITY;
-		sprite->location.y = (int)y;
+		sprite->location.y = (int)y;	
+
 	}
 
 	if(sprite->current_y_action == FALLING)

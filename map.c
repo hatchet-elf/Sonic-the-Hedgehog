@@ -46,8 +46,8 @@ map *map_init()
 	level->platforms[2].w = 400;
 	level->platforms[2].h = 30;
 
-	level->platforms[3].x = 650;
-	level->platforms[3].y = SCREEN_HEIGHT - 50;
+	level->platforms[3].x = 850;
+	level->platforms[3].y = SCREEN_HEIGHT - 590;
 	level->platforms[3].w = 400;
 	level->platforms[3].h = 30;
 
@@ -107,7 +107,7 @@ int map_collission(SDL_Rect *player, map *level)
 			{
 				player->y = level_y - player_h;
 
-				printf("COL_TOP: %d \n", x);
+				//printf("platform: %d  COL_TOP\n", x);
 
 				return COL_TOP;
 			}
@@ -121,7 +121,7 @@ int map_collission(SDL_Rect *player, map *level)
 			{
 				player->y = level_y + level_h;
 
-				printf("COL_BOTTOM: %d \n", x);
+				printf("platform: %d  COL_BOTTOM\n", x);
 
 				return COL_BOTTOM;
 			}
@@ -131,27 +131,27 @@ int map_collission(SDL_Rect *player, map *level)
 		if(player_x < level_x + level_w && player_x > level_x) 
 		{
 			if(player_y > level_y && player_y < level_y + level_h ||
-					player_y + player_h > level_y && player_y + player_h < level_x + level_h ||
+					player_y + player_h > level_y && player_y + player_h < level_y + level_h ||
+					// this is because Sonic can be taller than the platform
+					// so a condition where the top of sonic is above the platform and the bottom of Sonic
+					// is below the platform will be caught
 					player_y < level_y && player_y + player_h > level_y + level_h)
 			{
 				player->x = level_x + level_w;
-
-				printf("COL_RIGHT: %d\n", x);
 
 				return COL_RIGHT;
 			}
 		}
 
 		// Collission with the left hand side of a platform
-		if(player_x + player_h > level_x && player_x + player_h < level_x + level_w) 
+		if(player_x + player_w > level_x && player_x + player_w < level_x + level_w) 
 		{
-			if(player_y > level_y && (player_y < level_y + level_h) ||
-					player_y + player_h > level_y && player_y + player_h < level_x + level_h ||
+			if(player_y > level_y && player_y < level_y + level_h ||
+					player_y + player_h > level_y && player_y + player_h < level_y + level_h ||
 					player_y < level_y && player_y + player_h > level_y + level_h)
 			{
 				player->x = level_x  - player_w;
 
-				printf("COL_LEFT: %d\n", x);
 
 				return COL_LEFT;
 			}

@@ -1,5 +1,5 @@
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 960;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 
 #include <stdio.h>
@@ -15,6 +15,8 @@ const int SCREEN_HEIGHT = 960;
 
 int main(int arc, char *argv[])
 {
+
+	int width, height;
 
 	bool draw_collission_squares = false;
 	int collission_result;
@@ -38,7 +40,7 @@ int main(int arc, char *argv[])
 			0,
 			SCREEN_WIDTH,
 			SCREEN_HEIGHT,
-			SDL_WINDOW_SHOWN
+			SDL_WINDOW_SHOWN 
 	);
 
 	if(window == NULL)
@@ -47,11 +49,14 @@ int main(int arc, char *argv[])
 		return 1;
 	}
 
+	SDL_SetWindowResizable(window, SDL_TRUE);
+
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	SDL_Event event;
 	charactersurface = IMG_Load("sonicsheet.png");
 	sonicsprite = SDL_CreateTextureFromSurface(renderer, charactersurface);
-
 
 	// Initiate everything for Sonic
 	player sonic;
@@ -82,7 +87,8 @@ int main(int arc, char *argv[])
 		// handle keyboard input
 		while(SDL_PollEvent(&event))
 		{
-			switch(event.type){
+			switch(event.type)
+			{
 				case SDL_QUIT:
 					gameisrunning = false;
 					break;
@@ -98,6 +104,17 @@ int main(int arc, char *argv[])
 					draw_collission_squares = true;
 					}
 					break;
+
+				case SDL_WINDOWEVENT:
+					switch(event.window.event)
+					{
+						case SDL_WINDOWEVENT_RESIZED:
+							SDL_GetWindowSize(window, &width, &height);
+							//surface = SDL_GetWindowSurface(window);
+							//SDL_RenderSetViewport(renderer, NULL);
+							//SDL_RenderSetLogicalSize(renderer, width, height);
+							break;
+					}
 			}
 
 			keyboardstate = SDL_GetKeyboardState(NULL);
@@ -146,7 +163,7 @@ int main(int arc, char *argv[])
 				break;
 
 			case COL_TOP:
-				sonic.current_y_action = STANDING;
+					sonic.current_y_action = STANDING;
 				break;
 
 			case COL_BOTTOM:
@@ -154,6 +171,8 @@ int main(int arc, char *argv[])
 				break;
 
 			case COL_RIGHT:
+				// this is done to ensure that Sonics running is completely reset
+				// otherwise when player_move() is next called Sonic refreshes as moving through the platform
 				sonic.running_start_x = sonic.location.x;
         			sonic.running_start_x_time = SDL_GetTicks();
 				break;

@@ -36,4 +36,7 @@ a couple of levels
 
 load a map from a file
 
+have the game compile as a number of separate objects
+
+fix player jump when window is resized
 
