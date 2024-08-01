@@ -102,8 +102,12 @@ int map_collission(SDL_Rect *player, map *level)
 		// Collission with the top of a platform
 		if((player_y + player_h > level_y) && (player_y + player_h < level_y + level_h))
 		{
-			if((player->x + player_h > level_x && player_x + player_h < level_x + level_w) ||
-					(player_x > level_x && player_x < level_x + level_w))
+			// Add or remove the 10 pixels to ensure that when you jump and are up against a platform
+			// that the jump will continue to go up rather than straiht away putting the player on the platform
+			// Without adding and removing these pixels the player is jumping before suddenly standing on the platform
+			// with the jump cut short.
+			if((player->x + player_w - 10 > level_x && player_x + player_w < level_x + level_w) ||
+					(player_x > level_x && player_x + 10 < level_x + level_w))
 			{
 				player->y = level_y - player_h;
 
@@ -121,12 +125,12 @@ int map_collission(SDL_Rect *player, map *level)
 			{
 				player->y = level_y + level_h;
 
-				printf("platform: %d  COL_BOTTOM\n", x);
+				//printf("platform: %d  COL_BOTTOM\n", x);
 
 				return COL_BOTTOM;
 			}
 		}
-
+		
 		// Collission with the right hand side of a platform
 		if(player_x < level_x + level_w && player_x > level_x) 
 		{
@@ -142,7 +146,7 @@ int map_collission(SDL_Rect *player, map *level)
 				return COL_RIGHT;
 			}
 		}
-
+		
 		// Collission with the left hand side of a platform
 		if(player_x + player_w > level_x && player_x + player_w < level_x + level_w) 
 		{

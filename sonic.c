@@ -50,6 +50,7 @@ int main(int arc, char *argv[])
 	}
 
 	SDL_SetWindowResizable(window, SDL_TRUE);
+	SDL_GetWindowSize(window, &width, &height);
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
 	SDL_RenderSetLogicalSize(renderer, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -68,20 +69,6 @@ int main(int arc, char *argv[])
 
 	player_stand(&sonic);
 
-/******* test code
-	SDL_Rect all_sprites[7][7];
-	 
-	// fill the array with all the sprites from the spritesheet
-	for(y = 0; y < 7; y++){
-		for(x = 0; x < 7; x++){
-			all_sprites[y][x].y = y * 65;
-			all_sprites[y][x].x = x * 65;
-			all_sprites[y][x].w = 65;
-			all_sprites[y][x].h = 65;
-		}
-	}
-
-*/
 	while(gameisrunning)
 	{
 		// handle keyboard input
@@ -109,10 +96,8 @@ int main(int arc, char *argv[])
 					switch(event.window.event)
 					{
 						case SDL_WINDOWEVENT_RESIZED:
+							// we don't do anything here yet
 							SDL_GetWindowSize(window, &width, &height);
-							//surface = SDL_GetWindowSurface(window);
-							//SDL_RenderSetViewport(renderer, NULL);
-							//SDL_RenderSetLogicalSize(renderer, width, height);
 							break;
 					}
 			}
@@ -168,6 +153,7 @@ int main(int arc, char *argv[])
 
 			case COL_BOTTOM:
 				sonic.current_y_action = FALLING;
+
 				break;
 
 			case COL_RIGHT:
