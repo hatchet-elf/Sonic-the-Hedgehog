@@ -21,6 +21,9 @@
 #define JUMP_VELOCITY 1.9
 #define FALL_VELOCITY 1.3
 
+#define COYOTE_TIME 50
+#define JUMP_BUFFER 50
+
 #define RUNNINGRIGHT 0
 #define RUNNINGLEFT 1
 #define STARTRUNNING 2
@@ -30,7 +33,6 @@
 #define TOPOFJUMP 6
 #define STARTFALLING 7
 #define FALLING 8
-
 typedef struct
 {
         // stores players location
@@ -80,6 +82,12 @@ typedef struct
         // RUNNINGRIGHT - the player was facing to the right before stand() was called
         // RUNNINGLEFT - the player was facing to the left before stand() was called
         int left_or_right_before_standing;
+
+	// Used for Coyote time
+	Uint32 on_a_platform;
+
+	Uint32 jump_buffer;
+	bool jump_button_hit;
 
 
 } player;

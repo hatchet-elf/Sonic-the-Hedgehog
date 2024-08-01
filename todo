@@ -6,13 +6,13 @@ put function declarations in the header files
 DONE fix left and right collissions so sonic can't run past them
 add comments where required
 
-Cyote time
-jump buffer
+DONE Cyote time
+DONE jump buffer
 clip onto a platform
 make the jump nicer
 make falling nicer
 
-have sonic stay spinning when he headbutts a platform
+DONE have sonic stay spinning when he headbutts a platform
 
 add rings
 
@@ -39,4 +39,5 @@ load a map from a file
 have the game compile as a number of separate objects
 
 fix player jump when window is resized
+
 

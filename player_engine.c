@@ -31,18 +31,20 @@ int player_start_running_left(player *sprite)
 	return 0;
 }
 
-int player_jump(player *sprite)
-{
-/*
-	// if the player is not on the ground then don't do anything
-	if(sprite->location.y != terrain_ground_level())
-	{
+int player_jump(player *sprite){
+	
+	// this is for jump buffering
+	sprite->jump_button_hit = true;
+	sprite->jump_buffer = SDL_GetTicks();
+
+	// Coyote time
+	Uint32 coyote_timer = SDL_GetTicks() - sprite->on_a_platform;
+	if(coyote_timer > COYOTE_TIME){
 		return 0;
 	}
-*/
 
-	if(sprite->current_y_action == JUMPING)
-	{
+
+	if(sprite->current_y_action == JUMPING){
 		return 0;
 	}
 	sprite->current_y_action = JUMPING;
@@ -61,10 +63,9 @@ int player_jump(player *sprite)
 // returns RUNNINGLEFT if the player should be facing left
 // This is so that when the function is called you have an easy way of knowing which way the player was facing
 // the variable sprite->left_or_right_before_standing is also set
-int player_stand(player *sprite)
-{
-	if(sprite->current_y_action == (JUMPING || FALLING))
-	{
+int player_stand(player *sprite){
+
+	if(sprite->current_y_action == (JUMPING || FALLING)){
 		return 0;
 	}
 
@@ -76,13 +77,14 @@ int player_stand(player *sprite)
 	return sprite->left_or_right_before_standing;
 }
 
+// This is called whenever the player is not on a platform or jumping
 int player_fall(player *sprite)
 {
 	if(sprite->current_y_action == JUMPING)
 	{
 		return 0;
 	}
-	
+
 	sprite->current_y_action = FALLING;
 	sprite->fall_y = sprite->location.y;
 	sprite->fall_start_time = SDL_GetTicks();

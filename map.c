@@ -161,6 +161,7 @@ int map_collission(SDL_Rect *player, map *level)
 			}
 		}
 	}
+
 	return COL_NONE;
 }
 

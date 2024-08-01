@@ -18,6 +18,8 @@ int main(int arc, char *argv[])
 
 	int width, height;
 
+	Uint32 jump_buffer_check;
+
 	bool draw_collission_squares = false;
 	int collission_result;
 	const Uint8 *keyboardstate;
@@ -71,6 +73,7 @@ int main(int arc, char *argv[])
 
 	while(gameisrunning)
 	{
+
 		// handle keyboard input
 		while(SDL_PollEvent(&event))
 		{
@@ -148,11 +151,21 @@ int main(int arc, char *argv[])
 				break;
 
 			case COL_TOP:
-					sonic.current_y_action = STANDING;
+				sonic.current_y_action = STANDING;
+				sonic.on_a_platform = SDL_GetTicks();
+
+				jump_buffer_check = SDL_GetTicks();
+				if(((jump_buffer_check - sonic.jump_buffer) < JUMP_BUFFER) && sonic.jump_button_hit){
+					player_jump(&sonic);
+				}
+				sonic.jump_button_hit = false;
 				break;
 
 			case COL_BOTTOM:
-				sonic.current_y_action = FALLING;
+				//sonic.current_y_action = FALLING;
+				sonic.jump_y = sonic.location.y;
+				sonic.jump_start_time = SDL_GetTicks();
+				sonic.jump_velocity = 0;
 
 				break;
 
