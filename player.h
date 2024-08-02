@@ -19,7 +19,7 @@
 
 #define GRAVITY .001
 #define JUMP_VELOCITY 1.9
-#define FALL_VELOCITY 1.3
+#define FALL_VELOCITY 1
 
 #define COYOTE_TIME 50
 #define JUMP_BUFFER 50
@@ -91,3 +91,4 @@ typedef struct
 
 
 } player;
+

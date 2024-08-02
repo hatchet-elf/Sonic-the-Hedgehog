@@ -11,25 +11,13 @@ typedef struct
 
 } map;
 
-int map_on_the_ground(){
-        return SCREEN_HEIGHT - 65 - 50;
-}
-
-int map_ground_level(){
-        return SCREEN_HEIGHT - 65 - 100;
-}
-
-int map_in_the_air(){
-	return 1;
-}
-
-map *map_init()
+map *map_init(SDL_Rect *player_location)
 {
 	map *level;
 	level = (map*)malloc(sizeof(map));
 	memset(level, 0, sizeof(map));
 
-	level->platform_count = 4;
+	level->platform_count = 5;
 
 	level->platforms[0].x = 200;
 	level->platforms[0].y = SCREEN_HEIGHT - 200;
@@ -38,7 +26,7 @@ map *map_init()
 
 	level->platforms[1].x = 0;
 	level->platforms[1].y = SCREEN_HEIGHT - 10;
-	level->platforms[1].w = SCREEN_WIDTH;
+	level->platforms[1].w = 10000;
 	level->platforms[1].h = 30;
 
 	level->platforms[2].x = 625;
@@ -51,17 +39,20 @@ map *map_init()
 	level->platforms[3].w = 400;
 	level->platforms[3].h = 30;
 
+	level->platforms[4].x = 300;
+	level->platforms[4].y = 300;
+	level->platforms[4].w = 250;
+	level->platforms[4].h = 30;
+
 	return level;
 }
 
-int map_draw(SDL_Renderer *renderer, map *level){
+int map_draw(SDL_Renderer *renderer, map *level, SDL_Rect *player_location){
 	int x;
 
-	for(x = 0; x < level->platform_count; x++)
-	{
+	for(x = 0; x < level->platform_count; x++){
 		SDL_SetRenderDrawColor(renderer, 0, 100, 0, 0);
 		SDL_RenderFillRect(renderer, &level->platforms[x]);
-
 	}
 
 	return 0;
@@ -111,8 +102,6 @@ int map_collission(SDL_Rect *player, map *level)
 			{
 				player->y = level_y - player_h;
 
-				//printf("platform: %d  COL_TOP\n", x);
-
 				return COL_TOP;
 			}
 		}
@@ -124,8 +113,6 @@ int map_collission(SDL_Rect *player, map *level)
 					(player_x > level_x && player_x < level_x + level_w))
 			{
 				player->y = level_y + level_h;
-
-				//printf("platform: %d  COL_BOTTOM\n", x);
 
 				return COL_BOTTOM;
 			}

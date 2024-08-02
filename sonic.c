@@ -67,7 +67,7 @@ int main(int arc, char *argv[])
 
 	// init the map
 	map *level;
-	level = map_init();
+	level = map_init(&sonic.location);
 
 	player_stand(&sonic);
 
@@ -154,6 +154,8 @@ int main(int arc, char *argv[])
 				sonic.current_y_action = STANDING;
 				sonic.on_a_platform = SDL_GetTicks();
 
+				sonic.fall_velocity = 0;
+
 				jump_buffer_check = SDL_GetTicks();
 				if(((jump_buffer_check - sonic.jump_buffer) < JUMP_BUFFER) && sonic.jump_button_hit){
 					player_jump(&sonic);
@@ -185,9 +187,8 @@ int main(int arc, char *argv[])
 		// draw the map
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		SDL_RenderClear(renderer);
-		map_draw(renderer, level);
+		map_draw(renderer, level, &sonic.location);
 
-		//printf("sonic.x: %d  sonic.y:%d  sonic.h%d  sonic.w%d\n", sonic.location.x, sonic.location.y, sonic.location.h, sonic.location.w);
 		// draw the player
 		if(sonic.current_y_action == JUMPING)
 		{
@@ -203,7 +204,6 @@ int main(int arc, char *argv[])
 
 		if(sonic.current_y_action != JUMPING)
 		{
-			// Copy the next Sprite to the renderer
 			switch(sonic.current_x_action)
 			{
 				case RUNNINGRIGHT:

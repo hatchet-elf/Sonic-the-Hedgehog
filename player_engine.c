@@ -193,13 +193,17 @@ int player_move(player *sprite)
 	// For example: jumping whilst running
 	if(sprite->current_x_action == RUNNINGRIGHT)
 	{
-
 		end_run_time = SDL_GetTicks();
 		elapsed_run_time = end_run_time - sprite->running_start_x_time;
 
 		x = (float)sprite->running_start_x + (float)(elapsed_run_time / RUNNING_SPEED);
 
 		sprite->location.x = (int)x;
+
+		// Don't allow the player to run off the screen
+		if(sprite->location.x > SCREEN_WIDTH - sprite->location.w){
+			sprite->location.x = SCREEN_WIDTH - sprite->location.w;
+		}
 	}
 
 	if(sprite->current_x_action == RUNNINGLEFT)
@@ -209,6 +213,11 @@ int player_move(player *sprite)
 		x = (float)sprite->running_start_x - (float)(elapsed_run_time / RUNNING_SPEED);
 
 		sprite->location.x = (int)x;
+
+		// Don't allow the player to run off the screen
+		if(sprite->location.x < 0){
+			sprite->location.x = 0;
+		}
 	}
 
 	if(sprite->current_y_action == JUMPING)
@@ -225,7 +234,7 @@ int player_move(player *sprite)
 
 	if(sprite->current_y_action == FALLING)
 	{
-		sprite->location.y = sprite->location.y + 1;
+		sprite->location.y += FALL_VELOCITY;
 	}
 	return 0;
 }
@@ -311,28 +320,28 @@ int player_init(player *sprite)
 	sprite->standing[4].w = 44;
 	
 	// setup the frames for the player jumping
-	sprite->jumping[0].y = 65 * 4;
+	sprite->jumping[0].y = 66 * 4;
 	sprite->jumping[0].x = 65;
 	sprite->jumping[0].h = 65;
 	sprite->jumping[0].w = 65;
 
-	sprite->jumping[1].y = 65 * 4;
+	sprite->jumping[1].y = 66 * 4;
 	sprite->jumping[1].x = 65 * 2;
 	sprite->jumping[1].h = 65;
 	sprite->jumping[1].w = 65;
 
-	sprite->jumping[2].y = 65 * 4;
+	sprite->jumping[2].y = 66 * 4;
 	sprite->jumping[2].x = 65 * 3;
 	sprite->jumping[2].h = 65;
 	sprite->jumping[2].w = 65;
 
-	sprite->jumping[3].y = 65 * 4;
+	sprite->jumping[3].y = 66 * 4;
 	sprite->jumping[3].x = 65 * 4;
 	sprite->jumping[3].h = 65;
 	sprite->jumping[3].w = 65;
 
 	// have the player start at the lower left of the screen
-	sprite->location.x = 100;
+	sprite->location.x = SCREEN_WIDTH / 2;
 	sprite->location.y = SCREEN_HEIGHT - 200;
 	sprite->location.h = sprite_height;
 	sprite->location.w = sprite_width;

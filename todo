@@ -8,9 +8,9 @@ add comments where required
 
 DONE Cyote time
 DONE jump buffer
-clip onto a platform
-make the jump nicer
-make falling nicer
+N/A clip onto a platform
+DONE make the jump nicer
+N/A make falling nicer
 
 DONE have sonic stay spinning when he headbutts a platform
 
@@ -39,5 +39,4 @@ load a map from a file
 have the game compile as a number of separate objects
 
 fix player jump when window is resized
-
 
