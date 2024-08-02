@@ -27,7 +27,7 @@ sudo apt-get install libsdl2-dev
 ## Author
 
 * **hatchet-elf** 
-* **https://github.com/hatchet-elf/Sonic platforms** 
+* **https://github.com/hatchet-elf/Sonic-platforms** 
 
 
 ## License
