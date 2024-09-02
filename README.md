@@ -1,4 +1,4 @@
-# Sonic platforms
+# Sonic the Hedgehog
 
 This was going to be a game however I chose not to finish it.
 
